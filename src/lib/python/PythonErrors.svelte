@@ -49,6 +49,6 @@
     }}
 >
     <div class=output-container>
-        <CodeOutput value={errors.map(err => err.content.error).join("\n")} />
+        <CodeOutput value={errors.map(err => err.content?.error || err.content || err).join("\n")} />
     </div>
 </MessageDialog>
