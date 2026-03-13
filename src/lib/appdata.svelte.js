@@ -13,12 +13,6 @@ class AppData {
         preferences: PreferencesProfile
     })
 
-    frames = $state({
-        builder: [],
-        coder: [],
-        runner: []
-    })
-
     constructor() {
         this.ready = this.load()
     }
@@ -43,7 +37,6 @@ class AppData {
         )
         // apply
         Object.assign(this.profiles, data.profiles)
-        Object.assign(this.frames, data.frames)
     }
 
     async save() {
@@ -60,8 +53,7 @@ class AppData {
         await electron.files.save(
             file,
             JSON.stringify({
-                profiles: this.profiles,
-                files: this.frames
+                profiles: this.profiles
             }, undefined, 4)
         )
     }
