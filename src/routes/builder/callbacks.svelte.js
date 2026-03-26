@@ -187,6 +187,8 @@ export async function pasteRoutine() {
         element = new HasParams(clipboard.tag)
     }
     element.fromJSON(clipboard)
+    // assign experiment
+    element.exp = current.experiment
     // if element isn't a Routine, abort
     if (![Routine, HasParams].some(cls => element instanceof cls)) {
         return
