@@ -32,10 +32,10 @@ var windows = {
 // setup URI handling
 if (process.defaultApp && process.argv.length >= 2) {
   // if running via electrion + index.cjs path, include that path in the args
-  app.setAsDefaultProtocolClient('psychopy-studio', process.execPath, [path.resolve(process.argv[1])])
+  app.setAsDefaultProtocolClient('pavlovia', process.execPath, [path.resolve(process.argv[1])])
 } else {
   // if running via a compiled executable, just include executable
-  app.setAsDefaultProtocolClient('psychopy-studio')
+  app.setAsDefaultProtocolClient('pavlovia')
 }
 
 
@@ -60,8 +60,7 @@ clipboard = undefined
 let usageReport = new UsageReport()
 usageReport.send()
 
-// regex matching a pavlovia link
-let PAVLOVIA_RE = /(?:https?:\/\/)?(?<domain>run|gitlab)?\.?pavlovia\.org\/(?<user>.+?)\/(?<project>.+?)$/
+
 // setup listener for file open
 function onFileOpen(evt, file) {
   if (!file) {
@@ -69,13 +68,8 @@ function onFileOpen(evt, file) {
     return
   }
   // if opening from a smart URI, strip the start
-  if (file.startsWith("psychopy-studio://")) {
-    file = file.replace("psychopy-studio://", "")
-  }
-  if (file.match(PAVLOVIA_RE)) {
-    // open Pavlovia project in Builder
-    let match = file.match(PAVLOVIA_RE)
-    newWindow(`builder?projectOpen="${match.user}/${match.project}"`)
+  if (file.startsWith("pavlovia://")) {
+    newWindow(`builder?projectOpen="${file.replace("pavlovia://", "")}"`)
   } else if (file.endsWith(".psyexp")) {
     // open psyexp in Builder
     newWindow(`builder?fileOpen=${file}`, true, false)
