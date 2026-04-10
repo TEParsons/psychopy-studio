@@ -63,6 +63,7 @@ export class Flow {
      */
     clear() {
         this.flat.length = 0;
+        this.flat.push(this.exp.window)
     }
 
     removeElement(index) {

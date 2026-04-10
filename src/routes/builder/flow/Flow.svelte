@@ -22,6 +22,7 @@
             </div>
         </div>
         {#if current.experiment}
+            <EntryPoint></EntryPoint>
             {#each current.experiment.flow.dynamic as emt}
                 <div class=flow-animation>
                     {#if emt instanceof FlowLoop}

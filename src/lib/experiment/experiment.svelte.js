@@ -143,6 +143,8 @@ export class Experiment {
     constructor(filename) {
         // create attributes
         this.settings = new Component("SettingsComponent")
+        this.routines['win'] = this.window = new StandaloneRoutine("WindowRoutine")
+        this.window.exp = this
         this.flow = new Flow(this);
         // starting defaults
         this.reset()
@@ -183,10 +185,13 @@ export class Experiment {
         }
         // reset settings
         this.settings.reset()
+        this.window.reset()
         // remove all routines
         Object.keys(this.routines).forEach((key) => delete this.routines[key])
         // clear the flow
         this.flow.clear()
+        // add window routine
+        this.routines['win'] = this.window
         // add a default routine
         this.routines['trial'] = new Routine();
         this.routines['trial'].exp = this;

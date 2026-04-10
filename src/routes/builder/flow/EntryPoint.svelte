@@ -5,32 +5,38 @@
     let current = getContext("current");
     
     let {
-        index=undefined
+        index=undefined,
+        /** @prop @type {function<object => boolean>} Function which filters whether an element can be inserted here */
+        filter=element => true
     } = $props()
 
     let hovered = $state(false);
 
     let moving = $derived(
-        current.moving && [
+        current.moving 
+        && [
             Routine, 
             StandaloneRoutine, 
             LoopInitiator, 
             LoopTerminator
         ].includes(current.moving.constructor)
+        && filter(current.moving)
     )
     
     let inserting = $derived(
-        current.inserting && [
+        current.inserting 
+        && [
             Routine, 
             StandaloneRoutine, 
             LoopInitiator, 
             LoopTerminator
         ].includes(current.inserting.constructor)
+        && filter(current.inserting)
     )
 
     function insertHere(evt) {
         // if dragging, move dragged element here
-        if (current.moving) {
+        if (moving) {
             // update history
             current.experiment.history.update(`move ${current.moving.name} in flow`);
             // relocate it
@@ -39,7 +45,7 @@
             current.moving = undefined
         }
         // if inserting, insert element here
-        if (current.inserting) {
+        if (inserting) {
             // update history
             current.experiment.history.update(`insert ${current.inserting.name} into flow`);
             // insert
