@@ -1,6 +1,6 @@
 <script>
     import { python } from "$lib/globals.svelte";
-    import { SubMenu, MenuItem } from "$lib/utils/menu";
+    import { SubMenu, MenuItem } from "$lib/utils/menu/frameMenu";
     import { translate } from "$lib/translation";
     import { parsePath } from "$lib/utils/files";
     import { Script } from "$lib/experiment";
@@ -8,15 +8,15 @@
 
     let current = getContext("current")
 
-    function openDemo(file) {
+    async function openDemo(file) {
         // parse path to an object
         file = parsePath(file)
         // create script from file
         let script = new Script(file);
-        script.fromFile(file)
+        await script.fromFile(file)
         // remove file path so it just has a name (forcing "save as" rather than "save")
         script.file.file = script.file.name
-        script.file.parent = ""
+        script.file.parent = undefined
         // open script
         current.pages.push(
             script

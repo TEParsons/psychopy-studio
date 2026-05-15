@@ -61,7 +61,8 @@
             borderless
             disabled={
                 Object.values(current.pages).length === 0 ||
-                (!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file)
+                (!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file) || 
+                !current.pages[current.tab]?.file?.parent
             }
         />
         <IconButton 
