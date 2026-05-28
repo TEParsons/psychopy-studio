@@ -89,6 +89,28 @@ class User {
 }
 
 
+/**
+ * Append authentication to a URL
+ * 
+ * @returns {URL} The same URL, now with authentication
+ */
+async function authenticateUrl(url, username) {
+    // make sure url is an object
+    if (!(url instanceof URL)) {
+        url = new URL(url)
+    }
+    // apply auth
+    if (username && username in users) {
+        url.searchParams.set(
+            "access_token", 
+            await users[username].getToken()
+        )
+    }
+    
+    return url
+}
+
+
 // object storing authentication info for users against their username
 var users = {};
 // object storing file paths of known projects on this machine
@@ -361,21 +383,31 @@ export function clearProjects() {
 
 export async function listGroups(username) {
     // create URL
-    let url = new URL(`${server}/api/v4/groups`)
-    // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    let url = await authenticateUrl(`${server}/api/v4/groups`, username)
     // get groups
     return await fetch(
         url.toString()
     ).then(
         resp => resp.json()
+    )
+}
+
+
+export async function listProjects(group, username) {
+    // is group a group or a user?
+    let categURL = await authenticateUrl(`https://gitlab.pavlovia.org/api/v4/groups/${group}`, username)
+    let categ = await fetch(
+        categURL.toString()
     ).then(
-        resp => resp?.[0]
+        resp => resp.ok ? "groups" : "users"
+    )
+    // create search url
+    let url = await authenticateUrl(`https://gitlab.pavlovia.org/api/v4/${categ}/${group}/projects`, username)
+    // search for project
+    return await fetch(
+        url.toString()
+    ).then(
+        resp => resp.json()
     )
 }
 
@@ -463,12 +495,7 @@ export async function getRemote(folder, username=undefined) {
     }
     saveProjects()
     // parse to a URL
-    let url = new URL(remote)
-    // apply auth
-    if (username && username in users) {
-        url.username = "oauth2"
-        url.password = await users[username].getToken()
-    }
+    let url = await authenticateUrl(remote, username)
 
     return url.toString()
 }
@@ -499,21 +526,16 @@ export async function getProjectInfo({
         return
     }
     // create search url
-    let url = new URL(`https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}`)
-    // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    let url = await authenticateUrl(`https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}`, username)
     // search for project
     return await fetch(
         url.toString()
     ).then(
         resp => resp.json()
     ).then(
-        resp => resp?.[0]
+        resp => resp?.filter?.(
+            item => item.name === name 
+        )?.[0]
     )
 }
 
@@ -688,6 +710,7 @@ export const handlers = {
     clearUsers: ipcMain.handle("git.clearUsers", (evt) => clearUsers()),
     listUsers: ipcMain.handle("git.listUsers", (evt) => Object.keys(users)),
     listGroups: ipcMain.handle("git.listGroups", (evt, username) => listGroups(username)),
+    listGroups: ipcMain.handle("git.listProjects", (evt, group, username) => listProjects(group, username)),
     getUserInfo: ipcMain.handle("git.getUserInfo", (evt, username) => users[username]?.profile),
     getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => getRemote(folder, user)),
     getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, details, username) => getProjectInfo(details, username)),
