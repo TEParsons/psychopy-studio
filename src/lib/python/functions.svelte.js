@@ -240,6 +240,13 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         // start python
         status.message = translate("Starting Python...")
         await python.liaison.start(version).catch(handleError)
+        // activate plugins if version requires it
+        if (version !== "dev" && semver.parse(version) < "2027.1.0") {
+            await python.liaison.send(version, {
+                command: "run",
+                args: ["psychopy.plugins:activatePlugins"],
+            })
+        }
         // mark success
         status.message = translate("Successfully started Python")
         status.ready.resolve(true)

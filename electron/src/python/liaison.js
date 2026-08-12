@@ -146,19 +146,6 @@ export class Liaison {
             err => logging.error(`Failed to setup preferences`, err)
         }
 
-        // activate plugins
-        if (await this.send({
-            command: "exists",
-            args: ["psychopy.plugins:activatePlugins"]
-        }, 10000, true)) {
-            await this.send({
-                command: "run",
-                args: ["psychopy.plugins:activatePlugins"]
-            }, undefined, true).catch(
-                err => logging.error(["Failed to activate plugins", err])
-            )
-        }
-
         // mark ready
         this.ready.resolve()
     }
