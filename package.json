@@ -147,6 +147,7 @@
 		"wait-on": "^9.0.6"
 	},
 	"dependencies": {
+		"@electron-internal/extract-zip": "*",
 		"@lezer/javascript": "^1.5.4",
 		"@lezer/python": "^1.1.19",
 		"@monaco-editor/loader": "^1.5.0",
@@ -165,8 +166,7 @@
 		"semver": "^7.8.5",
 		"tar": "^7.5.22",
 		"tcp-port-used": "^1.0.3",
-		"xml-formatter": "^3.6.5",
-		"@electron-internal/extract-zip": "*"
+		"xml-formatter": "^3.6.5"
 	},
 	"optionalDependencies": {
 		"@rollup/rollup-linux-x64-gnu": "*",
