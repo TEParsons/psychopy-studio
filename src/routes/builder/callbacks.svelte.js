@@ -250,10 +250,10 @@ export async function sendToRunner() {
  */
 export async function compilePython(focus=true) {
     // if no file, save as
-    if (current.experiment.file === undefined) {
+    if (current.experiment.file?.file === undefined) {
         await file_save_as()
         // if cancelled save, cancel compile
-        if (current.experiment.file === undefined) {
+        if (current.experiment.file?.file === undefined) {
             return
         }
     }
@@ -272,10 +272,10 @@ export async function compilePython(focus=true) {
  */
 export async function compileJS(focus=true) {
     // if no file, save as
-    if (current.experiment.file === undefined) {
+    if (current.experiment.file?.file === undefined) {
         await file_save_as()
         // if cancelled save, cancel compile
-        if (current.experiment.file === undefined) {
+        if (current.experiment.file?.file === undefined) {
             return
         }
     }
@@ -290,6 +290,14 @@ export async function compileJS(focus=true) {
 export async function runPython() {
     if (!python) {
         return
+    }
+    // if no file, save as
+    if (current.experiment.file?.file === undefined) {
+        await file_save_as()
+        // if cancelled save, cancel run
+        if (current.experiment.file?.file === undefined) {
+            return
+        }
     }
     // compile to JS
     await compilePython(false)
@@ -315,6 +323,14 @@ export async function stopPython(executable) {
 export async function runJS() {
     if (!python) {
         return
+    }
+    // if no file, save as
+    if (current.experiment.file?.file === undefined) {
+        await file_save_as()
+        // if cancelled save, cancel run
+        if (current.experiment.file?.file === undefined) {
+            return
+        }
     }
     // compile to JS
     await compileJS(false)
