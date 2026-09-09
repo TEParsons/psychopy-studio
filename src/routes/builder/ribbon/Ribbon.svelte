@@ -199,7 +199,6 @@
                 icon="/icons/btn-compilepy.svg" 
                 label={translate("Write experiment as a .py file")} 
                 onclick={evt => compilePython()}
-                disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.compilepy}
                 borderless
             /> 
@@ -207,7 +206,6 @@
                 icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}py.svg" 
                 label={current.experiment.pilotMode ? translate("Pilot experiment locally") : translate("Run experiment locally")}
                 onclick={evt => runPython()}
-                disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.runpy}
                 cancel={evt => stopPython()}
                 borderless
@@ -219,7 +217,6 @@
                     icon="/icons/btn-compilejs.svg" 
                     label={translate("Write experiment as a .js file")} 
                     onclick={(evt) => compileJS()}
-                    disabled={!current.experiment.file.file}
                     bind:awaiting={awaiting.compilejs}
                     borderless
                 />
@@ -227,7 +224,7 @@
                     icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}js.svg" 
                     label={current.experiment.pilotMode ? translate("Pilot experiment in browser") : translate("Run experiment in browser")}
                     onclick={(evt) => runJS()}
-                    disabled={!current.experiment.file.file || (!current.experiment.pilotMode && !current.project)}
+                    disabled={!current.experiment.pilotMode && !current.project}
                     bind:awaiting={awaiting.runjs}
                     borderless
                 />
