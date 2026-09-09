@@ -243,8 +243,12 @@ export async function sendToRunner() {
     await openIn(current.experiment.file.file, "runner")
 }
 
-
-export async function compilePython() {
+/**
+ * Compile experiment to a JS file
+ * 
+ * @param {boolean} focus Focus Coder afterwards
+ */
+export async function compilePython(focus=true) {
     // if no file, save as
     if (current.experiment.file === undefined) {
         await file_save_as()
@@ -256,12 +260,17 @@ export async function compilePython() {
     // use experiment object to write
     let target = await current.experiment.writeScript("PsychoPy")
     // open in Coder
-    openIn(target, "coder");
+    openIn(target, "coder", focus);
 
     return target
 }
 
-export async function compileJS() {
+/**
+ * Compile experiment to a JS file
+ * 
+ * @param {boolean} focus Focus Coder afterwards
+ */
+export async function compileJS(focus=true) {
     // if no file, save as
     if (current.experiment.file === undefined) {
         await file_save_as()
@@ -273,18 +282,23 @@ export async function compileJS() {
     // use experiment object to write
     let target = await current.experiment.writeScript("PsychoJS");
     // open in Coder
-    openIn(target, "coder");
+    openIn(target, "coder", focus);
 
     return target
 }
 
 export async function runPython() {
+    if (!python) {
+        return
+    }
+    // compile to JS
+    await compilePython(false)
     // send to runner
     await sendToRunner()
     // mute error popups (errors will be shown in Runner)
     current.errorPopups = false
     // run script
-    await current.experiment.runPython(true)
+    await current.experiment.runPython(false)
     // re-enable error popups
     current.errorPopups = true
 
@@ -303,7 +317,7 @@ export async function runJS() {
         return
     }
     // compile to JS
-    await compileJS()
+    await compileJS(false)
     // run
     if (current.experiment.pilotMode) {
         await current.experiment.runJS(true)

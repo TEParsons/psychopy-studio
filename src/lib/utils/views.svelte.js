@@ -22,7 +22,7 @@ export function newWindow(target) {
  * @param {string} file File to open
  * @param {string} target Window to open in
  */
-export async function openIn(file, target) {
+export async function openIn(file, target, focus=true) {
     if (electron) {
         // get windows matching target
         let windows = await electron.windows.get(target);
@@ -36,7 +36,9 @@ export async function openIn(file, target) {
         // send request to window to open file
         await electron.windows.send(id, "fileOpen", $state.snapshot(file))
         // focus window
-        await electron.windows.focus(id)
+        if (focus) {
+            await electron.windows.focus(id)
+        }
     }
 }
 
