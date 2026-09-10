@@ -154,6 +154,52 @@ export class Experiment {
     }
 
     /**
+     * Rename a Routine in this experiment.
+     * 
+     * @param {String|Routine|StandaloneRoutine} routine Routine to rename, can be the object itself or its current name
+     * @param {String} value New name
+     */
+    renameRoutine(routine, value) {
+        // abort if name is already an existing Routine
+        if (value in this.routines) {
+            return
+        }
+        // figure out name this Routine is stored under
+        let oldName
+        for (let [key, val] of Object.entries(this.routines)) {
+            // if given a Routine name, get object
+            if (key === routine) {
+                oldName = key
+                routine = val
+            }
+            // if given a Routine object, get name
+            if (val === routine) {
+                oldName = key
+            }
+        }
+        // error if Routine is not in experiment
+        if (!oldName) {
+            console.error(
+                `Cannot rename Routine ${routine} as experiment ${this.file.name} has no Routine by that name.`
+            )
+            return
+        }
+        // abort if name hasn't changed
+        if (oldName === value) {
+            return
+        }
+        // set name param
+        if (routine instanceof Routine) {
+            routine.settings.params['name'].val = value
+        } else {
+            routine.params['name'].val = value
+        }
+        // update routines object
+        delete this.routines[oldName]
+        this.routines[value] = routine
+    }
+
+    /**
      * Add a Routine to this experiment. Handles namespace conflicts and assigning parentage.
      * 
      * @param {Routine|StandaloneRoutine} routine Routine to add
