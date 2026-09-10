@@ -43,6 +43,7 @@
     bind:value={param.val}
     style:color={param.valid.value ? "inherit" : "var(--red)"}
     id={param.name}
+    aria-label={param.label}
     {@attach element => param.registerValidator("validator", validateValidator, 0)}
     {...attachments}
 >

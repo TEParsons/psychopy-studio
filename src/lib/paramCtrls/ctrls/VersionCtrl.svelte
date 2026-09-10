@@ -47,6 +47,7 @@
     disabled={disabled || param.allowedVals.length == 1} 
     bind:value={param.val}
     id={param.name}
+    aria-label={param.label}
     style:color={param.valid.value ? "inherit" : "var(--red)"}
     {@attach element => param.registerValidator("version", validateVersion, 0)}
     {...attachments}

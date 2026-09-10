@@ -28,6 +28,7 @@
 <textarea 
     class=param-text-input-multi
     bind:value={param.val} 
+    aria-label={param.label}
     class:valid={param.valid.value} 
     class:code={param.isCode} 
     disabled={disabled}

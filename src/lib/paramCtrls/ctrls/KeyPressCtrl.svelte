@@ -64,6 +64,7 @@
         <input 
             type=text
             bind:this={handle}
+            aria-label={param.label}
             onkeydown={evt => {
                 // prevent usual effect
                 evt.preventDefault()

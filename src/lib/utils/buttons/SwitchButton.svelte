@@ -23,6 +23,7 @@
         value = !value;
         onclick(evt)
     }}
+    aria-label="{labels[0]}/{labels[1]} switch ({value ? labels[1] : labels[0]} selected)"
     onmouseenter={() => showTooltip = true}
     onmouseleave={() => showTooltip = false}
     onfocusin={() => showTooltip = true}

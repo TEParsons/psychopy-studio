@@ -18,6 +18,7 @@
 
 <select 
     class=param-locale-input
+    aria-label={param.label}
     disabled={disabled || locales.length === 0} 
     bind:value={param.val}
     style:color={param.valid.value ? "inherit" : "var(--red)"}

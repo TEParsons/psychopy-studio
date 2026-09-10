@@ -24,6 +24,7 @@
         {#each options as [val, details]}
             <button
                 class=rich-ctrl-item
+                aria-label="{param.label} option: {details.label}"
                 class:selected={param.val === val}
                 onclick={(evt) => param.val = val}
             >

@@ -10,6 +10,7 @@
     class=param-bool-input 
     type="checkbox" 
     id={param.name}
+    aria-label={param.label}
     bind:checked={
         () => [true, "true", "True", 1, "1"].includes(param.val),
         (val) => param.val = val
