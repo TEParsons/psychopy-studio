@@ -82,29 +82,42 @@ export class Experiment {
     namespace = $derived.by(() => {
         // start with none
         let names = {}
+        // define function to handle collisions
+        function addName(param) {
+            // take snapshot of value to get key
+            let key = $state.snapshot(param.val)
+
+            if (key in names) {
+                // if already present, append to entry
+                names[key] = [names[key], param]
+            } else {
+                // if not present, add as normal
+                names[key] = param
+            }
+        }
         // iterate through all Routines
         for (let rt of Object.values(this.routines)) {
             // for a Routine, iterate through Components
             if (rt instanceof Routine) {
                 for (let comp of rt.components) {
                     // add Component name and param
-                    names[comp.name] = comp.params['name']
+                    addName(comp.params['name'])
                 }
                 // add Routine name and param
-                names[rt.name] = rt.settings.params['name']
+                addName(rt.settings.params['name'])
             } else {
                 // add Routine name and param
-                names[rt.name] = rt.params['name']
+                addName(rt.params['name'])
             }
         }
         // iterate through all loops
         for (let loop of Object.values(this.flow.loops)) {
             // add Loop name
-            names[loop.name] = loop.params['name']
+            addName(loop.params['name'])
         }
         // iterate through all devices
         for (let device of Object.values(devices)) {
-            names[device.name] = device.params['name']
+            addName(device.params['name'])
         }
         
         return names
