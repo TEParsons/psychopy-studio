@@ -56,6 +56,7 @@
 <dialog 
     id={id} 
     bind:this={handle}
+    aria-labelledby={title}
 >
     {#if shown}
         <div class="title">

@@ -65,7 +65,7 @@
     <button
         class=more-btn
         onclick={(evt) => showMenu = !showMenu}
-        aria-label="v"
+        aria-label="Expand"
     >
         <div class=chevron>
             <Icon 

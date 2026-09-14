@@ -22,6 +22,7 @@
 <div 
     class=param-code-input-multi
     id={param.name}
+    aria-label={param.label}
     {@attach element => param.registerValidator("code", validateCode, 10)}
     {...attachments}
 >

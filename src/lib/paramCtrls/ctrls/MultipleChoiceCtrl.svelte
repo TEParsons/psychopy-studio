@@ -29,6 +29,7 @@
             <input
                 type=checkbox
                 id="{param.name}:{val}"
+                aria-label="{param.label} option: {label}"
                 bind:checked={
                     () => param.val.includes(val),
                     (value) => {

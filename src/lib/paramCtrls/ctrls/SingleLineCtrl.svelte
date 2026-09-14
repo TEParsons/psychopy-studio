@@ -34,6 +34,7 @@
     class:valid={param.valid.value} 
     class:code={param.isCode} 
     disabled={disabled}
+    aria-label={param.label}
     {@attach element => param.registerValidator("text", validateText, 10)}
     {...attachments}
 />

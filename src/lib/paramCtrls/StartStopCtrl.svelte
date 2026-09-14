@@ -57,6 +57,7 @@
             class=param-value 
             type="text" 
             id={valueParam.name}
+            aria-label={valueParam.label}
             bind:value={valueParam.val} 
         />
     {/if}
@@ -71,6 +72,7 @@
             class=param-estim 
             type="text" 
             bind:value={expectedParam.val} 
+            
             id={expectedParam?.name}
         />
     {/if}

@@ -89,6 +89,7 @@
         class:code={param.isCode} 
         disabled={disabled}
         id={param.name}
+        aria-label={param.label}
         {@attach element => param.registerValidator("multiText", validateMultiText, 10)}
         {...attachments}
     >
