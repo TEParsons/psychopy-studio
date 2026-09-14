@@ -41,6 +41,9 @@ export class Param {
                 // run validation
                 validator.validate(this, output);
             } catch (err) {
+                // show error without crashing
+                console.error(err)
+                // indicate an error in validation
                 return {
                     value: false,
                     warning: "Error validating parameter"
