@@ -15,6 +15,16 @@
             param => param.valid.value
         )
     )
+
+    // update reference in Experiment when this Routine is renamed
+    $effect(() => {
+        if (routine.exp) {
+            routine.exp.renameRoutine(
+                routine, 
+                $state.snapshot(routine.params['name'].val)
+            )
+        }
+    })
 </script>
 
 <div class=standalone-routine-canvas>

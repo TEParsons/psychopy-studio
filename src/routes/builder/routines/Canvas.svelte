@@ -21,6 +21,16 @@
             y: undefined
         }
     })
+
+    // update reference in Experiment when this Routine is renamed
+    $effect(() => {
+        if (routine.exp) {
+            routine.exp.renameRoutine(
+                routine, 
+                $state.snapshot(routine.settings.params['name'].val)
+            )
+        }
+    })
 </script>
 
 <div 
