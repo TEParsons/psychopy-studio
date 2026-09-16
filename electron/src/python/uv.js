@@ -343,7 +343,7 @@ export class UV {
                 )
                 // make venv again - this time with Rosetta
                 await this.execTracked([
-                    "venv", folder, "--python", pythonVersion, "--clear"
+                    "venv", folder, "--python", pythonVersion, "--clear", "--no-config"
                 ])
             } else {
                 throw err
