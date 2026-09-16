@@ -19,7 +19,7 @@
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
     import TipsDialog from '../../lib/dialogs/tips/TipsDialog.svelte';
-    import { updateLocale, translate } from "$lib/translation";
+    import { translate } from "$lib/translation";
 
     // parse url params
     let params = new URLSearchParams(location.search)
@@ -40,7 +40,6 @@
         electron.windows.emit("ready", true)
     }
 
-    $effect(updateLocale)
 
     // keep app state up to date with open files
     if (electron) {

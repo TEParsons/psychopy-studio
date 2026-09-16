@@ -1,1 +1,1 @@
-export { translate, locales, setLocale, getLocale, updateLocale } from "./translation.svelte";
+export { translate, locales, setLocale, getLocale } from "./translation.svelte";

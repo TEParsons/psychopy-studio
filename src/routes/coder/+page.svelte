@@ -15,7 +15,6 @@
     import { electron, python } from "$lib/globals.svelte";
     import SetupPython from "$lib/python/SetupPython.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
-    import { updateLocale } from "$lib/translation";
     import { translate } from "$lib/translation";
     
 
@@ -38,8 +37,6 @@
         // mark ready
         electron.windows.emit("ready", true)
     }
-
-    $effect(updateLocale)
 
     // keep app state up to date with open files
     if (electron) {

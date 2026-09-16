@@ -19,7 +19,7 @@
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
-    import { updateLocale, translate } from "$lib/translation"
+    import { translate } from "$lib/translation"
     
 
     setContext("current", current)
@@ -84,8 +84,6 @@
             current.tab = "pavlovia";
         }
     )
-
-    $effect(updateLocale)
 
     // keep app state up to date with open files
     if (electron) {
