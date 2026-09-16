@@ -74,25 +74,31 @@ i18next.init({
     }
 });
 
+// state tracking the current locale
+let locale = $derived.by(evt => {
+    // get locale from prefs
+    let value = prefs.params['locale']?.val
+    // if default, get system locale
+    if (!value || value === "system locale") {
+        value = universalLanguageDetect({
+            supportedLanguages: locales,
+            fallbackLanguage: "en_US"
+        })
+    }
 
-
+    return value
+})
 // export translate function
-export const translate = i18next.t;
+export const translate = str => {
+    // set locale in i18next if state has changed
+    if (i18next.language !== locale) {
+        setLocale(locale)
+    }
+    // translate as normal
+    return i18next.t(str)
+};
 // export available localtes
 export const locales = Object.keys(i18next.toJSON().store.data)
 // export functions to get/set locale
 export const setLocale = i18next.changeLanguage
 export const getLocale = () => i18next.language
-// export effect to update from prefs (needs to be mounted to root element)
-export function updateLocale() {
-    // get locale from prefs
-    let locale = prefs.params['locale']?.val
-    // if default, get system locale
-    if (!locale || locale === "system locale") {
-        locale = universalLanguageDetect({
-            supportedLanguages: locales,
-            fallbackLanguage: "en_US"
-        })
-    }
-    i18next.changeLanguage(locale)
-}
