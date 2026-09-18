@@ -27,6 +27,11 @@ svelte/.vscode
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
 # Design files
 *.afdesign
 *.afdesign~lock~

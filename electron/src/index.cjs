@@ -87,20 +87,22 @@ const createWindow = () => {
   }
   // mark started
   started = true
+  // should we show a splash window?
+  let showSplash = prefs.params?.showSplash?.val !== "False" && !process.argv.includes("--no-splash")
   // create splash
-  windows.splash = new BrowserWindow({
-    icon: favicon,
-    title: "PsychoPy Studio",
-    width: 720,
-    height: 400,
-    show: false,
-    transparent: true,
-    frame: false,
-    alwaysOnTop: true
-  });
-  windows.splash.loadFile(path.join(__dirname, 'splash.html'));
-  windows.splash.center();
-  if (prefs.params?.showSplash?.val !== "False") {
+  if (showSplash) {
+    windows.splash = new BrowserWindow({
+      icon: favicon,
+      title: "PsychoPy Studio",
+      width: 720,
+      height: 400,
+      show: false,
+      transparent: true,
+      frame: false,
+      alwaysOnTop: true
+    });
+    windows.splash.loadFile(path.join(__dirname, 'splash.html'));
+    windows.splash.center();
     // only show if requested via prefs
     windows.splash.show();
   }
@@ -110,7 +112,7 @@ const createWindow = () => {
   // start timers so that we have a min time to show the splash and a max time to stop waiting for Svelte
   let mintime = new Promise((resolve, reject) => setTimeout(
     resolve, 
-    prefs.params?.showSplash?.val !== "False" ? 1000 : 0)
+    showSplash ? 1000 : 0)
   );
   let maxtime = new Promise((resolve, reject) => setTimeout(
     resolve, 
