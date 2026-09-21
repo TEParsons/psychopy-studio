@@ -93,7 +93,9 @@
         border: 1px solid var(--overlay);
         padding: 1rem;
         border-radius: .5rem;
-        overflow-x: hidden;
+        box-sizing: border-box;
+        width: 100%;
+        overflow-x: auto;
         word-wrap: break-word;
     }
     .package-page {
