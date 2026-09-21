@@ -1,7 +1,7 @@
 <script>
     import { marked } from "marked";
     import { getContext } from "svelte";
-    import { Button } from "$lib/utils/buttons";
+    import VersionCtrl from "../VersionCtrl.svelte";
     import ProgressDlg from "../ProgressDlg.svelte";
     import { translate } from "$lib/translation";
 
@@ -23,39 +23,9 @@
      // install progress information
     let showProgress = $state.raw(false)
 
-    let installed = $derived(
-        Object.keys(siblings.installed).includes(name)
+    $inspect(
+        siblings.installed[name]
     )
-
-    async function install(evt) {
-        // show progress dlg
-        showProgress = true
-        // install
-        return await python.venv.installPackage(
-            venv, name
-        ).then(
-            resp => python.venv.getPackages(
-                venv
-            ).then(
-                packages => siblings.installed = packages
-            )
-        );
-    }
-
-    async function uninstall(evt) {
-        // show progress dlg
-        showProgress = true
-        // install
-        return await python.venv.uninstallPackage(
-            venv, name
-        ).then(
-            resp => python.venv.getPackages(
-                venv
-            ).then(
-                packages => siblings.installed = packages
-            )
-        );
-    }
 </script>
 
 {#snippet page()}
@@ -67,21 +37,11 @@
         {:then profile}
             <div class=package-name><code>{profile.info.name}</code></div>
             <div class=ctrls>
-                {#if !installed}
-                    <Button
-                        label={translate("Install")}
-                        icon="/icons/btn-download.svg"
-                        onclick={install}
-                        horizontal
-                    />
-                {:else}
-                    <Button
-                        label={translate("Uninstall")}
-                        icon="/icons/btn-delete.svg"
-                        onclick={uninstall}
-                        horizontal
-                    />
-                {/if}
+                <VersionCtrl 
+                    pipname={name}
+                    bind:installed={siblings.installed[name]}
+                    venv={venv}
+                />
             </div>
             <div class=package-desc>
                 {@html marked(profile.info.description || "")}
@@ -105,7 +65,7 @@
 
 <button 
     class=package-item
-    class:installed={installed}
+    class:installed={siblings.installed[name]}
     class:selected={siblings.selected === page}
     onclick={evt => siblings.selected = page}
 >
@@ -145,5 +105,13 @@
     }
     .package-name {
         font-size: 2rem;
+    }
+
+    .ctrls {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: .5rem;
+        margin: 1rem 0;
     }
 </style>
