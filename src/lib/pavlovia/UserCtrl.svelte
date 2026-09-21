@@ -33,7 +33,7 @@
             <MenuItem
                 label={translate("Edit user...")}
                 icon="/icons/btn-edit.svg"
-                onclick={evt => window.open("https://gitlab.pavlovia.org/-/profile", "_blank")}
+                onclick={evt => window.open("https://gitlab.pavlovia.org/-/user_settings/profile", "_blank")}
             />
             <SubMenu 
                 label={translate("Switch user...")}
