@@ -1,6 +1,5 @@
 <script>
     import { electron } from "$lib/globals.svelte";
-    import { setContext } from "svelte";
 
     let {
         /** @param @type {function} Callback to execute when a file is dropped on this frame */
@@ -15,9 +14,6 @@
         show: false,
         indicator: undefined
     })
-    // list focus methods for each focusable panel in the frame, in order
-    let focusPanels = $state([])
-    setContext("focusPanels", focusPanels)
 </script>
 
 <div 
@@ -47,26 +43,6 @@
         {@render children()}
     </div>
 </div>
-
-<svelte:window 
-    onkeydown={evt => {
-        if (evt.ctrlKey && evt.key === "Tab") {
-            // sort focus panels by DOM position
-            let sorted = focusPanels.toSorted(
-                (a, b) => a.handle.compareDocumentPosition(b.handle) === 4 ? -1 : 1
-            )
-            // get index of focused panel
-            let i = sorted.findIndex(
-                obj => obj.hasFocus(obj.handle)
-            )
-            // focus the next panel
-            let target = sorted[
-                i < sorted.length - 1 ? i + 1 : 0
-            ]
-            target.receiveFocus(target.handle)
-        }
-    }}
-/>
 
 <style>
 #frame {

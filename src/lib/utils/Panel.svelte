@@ -1,5 +1,6 @@
 <script>
-    import { onMount, getContext } from "svelte";
+    import { onMount } from "svelte";
+    import { panels } from "$lib/globals.svelte";
 
     let {
         /** @prop @type {string} Text to display in this panel's sash */
@@ -13,7 +14,7 @@
 
     onMount(() => {
         // add to focusable panels
-        getContext("focusPanels").push({
+        let entry = {
             handle: handle,
             // function to query whether the ribbon has focus
             hasFocus: () => handle?.contains?.(document.activeElement),
@@ -33,8 +34,13 @@
                     break
                 }
             }
-        })
-    })    
+        }
+        panels.push(entry)
+        // remove from focusable panels once unmounted
+        return () => {
+            panels.splice(panels.indexOf(entry), 1)
+        }
+    })
 </script>
 
 <div class="panel" bind:this={handle}>

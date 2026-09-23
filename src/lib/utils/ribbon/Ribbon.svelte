@@ -1,5 +1,6 @@
 <script>
-    import { onMount, setContext, getContext } from "svelte";
+    import { onMount, setContext } from "svelte";
+    import { panels } from "$lib/globals.svelte";
 
     let {
         /** @interface */
@@ -14,7 +15,7 @@
             // set context so children have access to DOM element
             setContext("ribbon", handle) 
             // add to focusable panels
-            getContext("focusPanels").push({
+            let entry = {
                 handle: handle,
                 // function to query whether the ribbon has focus
                 hasFocus: () => handle?.contains?.(document.activeElement),
@@ -34,7 +35,12 @@
                         break
                     }
                 }
-            })
+            }
+            panels.push(entry)
+            // remove from focusable panels once unmounted
+            return () => {
+                panels.splice(panels.indexOf(entry), 1)
+            }
         }
     )
 </script>
