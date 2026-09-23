@@ -1,65 +1,50 @@
 <script>
+    import { onMount, getContext } from "svelte";
+
     let {
         /** @prop @type {string} Text to display in this panel's sash */
         title,
-        /** @prop @type {string} Shortcut key to focus this panel (pressed with ALT) */
-        shortcut=undefined,
         /** @interface */
         children=undefined
     } = $props()
 
-    // handle of this panel's HTML element
+    // state which keeps track of the index of each section
     let handle = $state.raw()
-    // tracks when the Alt key is pressed (for visual indicators)
-    let altKey = $state.raw(false)
+
+    onMount(() => {
+        // add to focusable panels
+        getContext("focusPanels").push({
+            handle: handle,
+            // function to query whether the ribbon has focus
+            hasFocus: () => handle?.contains?.(document.activeElement),
+            // function to execute when the ribbon receives focus
+            receiveFocus: () => {
+                for (
+                    let child of Array.from(
+                        handle.getElementsByTagName("*")
+                    )
+                    .filter(
+                        child => child.tabIndex >= 0 && !child.disabled
+                    ).toSorted(
+                        (a, b) => a.tabIndex - b.tabIndex
+                    )
+                ) {
+                    child.focus()
+                    break
+                }
+            }
+        })
+    })    
 </script>
 
 <div class="panel" bind:this={handle}>
     <div class="pnl-title">
-        {#if shortcut && altKey && title.toLowerCase().includes(shortcut.toLowerCase())}
-            {@const i = title.toLowerCase().indexOf(shortcut.toLowerCase())}
-            {title.slice(0, i)}<u>{title[i]}</u>{title.slice(i+1)}
-        {:else if shortcut && altKey}
-            {title} [<u>{shortcut}</u>]
-        {:else}
-            {title}
-        {/if}
+        {title}
     </div>
     <div class="pnl-content">
         {@render children?.()}
     </div>
 </div>
-
-<svelte:window 
-    onkeydown={evt => {
-        // mark alt pressed
-        if (evt.key === "Alt") {
-            altKey = true
-        }
-        // focus first child
-        if (shortcut && altKey && evt.key === shortcut) {
-            for (
-                let child of Array.from(
-                    handle.getElementsByTagName("*")
-                )
-                .filter(
-                    child => child.tabIndex >= 0 && !child.disabled
-                ).toSorted(
-                    (a, b) => a.tabIndex - b.tabIndex
-                )
-            ) {
-                child.focus()
-                break
-            }
-        }
-    }}
-    onkeyup={evt => {
-        // mark alt released
-        if (evt.key === "Alt") {
-            altKey = false
-        }
-    }}
-/>
 
 
 <style>
