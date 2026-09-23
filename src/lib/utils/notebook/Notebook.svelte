@@ -27,10 +27,16 @@
 <div 
     class=notebook
 >
-    <div class=notebook-tabs>
+    <div 
+        class=notebook-tabs
+        role=tablist
+    >
         {@render children?.()}
     </div>
-    <div class=notebook-page>
+    <div 
+        class=notebook-page
+        role=tabpanel
+    >
         {#if pages.selected.index === undefined}
             <div class=placeholder-page>
                 <svg>

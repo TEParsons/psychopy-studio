@@ -103,6 +103,7 @@
     ondblclick={(evt) => renaming = true}
     ondragover={() => selected = true}
     bind:this={handle}
+    role=tab
 >
     {#if icon}
         <Icon 
