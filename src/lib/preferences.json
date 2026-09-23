@@ -1135,7 +1135,7 @@
         },
         "focusNextPanel": {
             "val": [
-                "{CMD}",
+                "CONTROL",
                 "TAB"
             ],
             "valType": "keypress",
