@@ -181,26 +181,8 @@ export function togglePiloting() {
     }
 }
 
-/**
- * Move focus to the next focusable panel, in DOM order
- */
-export function focusNextPanel() {
-    // sort focus panels by DOM position
-    let sorted = panels.toSorted(
-        (a, b) => a.handle.compareDocumentPosition(b.handle) === 4 ? -1 : 1
-    )
-    // get index of focused panel
-    let i = sorted.findIndex(
-        obj => obj.hasFocus(obj.handle)
-    )
-    // focus the next panel
-    let target = sorted[
-        i < sorted.length - 1 ? i + 1 : 0
-    ]
-    target.receiveFocus(target.handle)
-}
 
-export { newWindow, showWindow } from "$lib/utils/views.svelte"
+export { newWindow, showWindow, focusNextPanel } from "$lib/utils/views.svelte"
 
 
 export var shortcuts = {
