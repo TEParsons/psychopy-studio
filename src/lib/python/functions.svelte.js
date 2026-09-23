@@ -76,12 +76,9 @@ export async function installPython(version=undefined, forceReinstall=false) {
     // sanitize version
     version = await sanitizeVersion(version)
     // remove any dogfood details from version
-    if (semver.parse(version)) {
-        version = semver.parse(
-            version,
-            { includePrerelease: false }
-        ).format()
-    }
+    try {
+        version = `${semver.major(version)}.${semver.minor(version)}.${semver.patch(version)}`
+    } catch {}
     // get python version
     let pyVersion
     if (version === "dev") {
@@ -172,16 +169,15 @@ export async function installPsychoPy(version=undefined, forceReinstall=false) {
     // is this a prerelease version?
     let prerelease
     if (version === "dev") {
-        prerelease = true
+        prerelease = "dev"
     } else if (semver.parse(version).prerelease) {
-        prerelease = true
-        version = semver.parse(version, { includePrerelease: false }).format()
+        prerelease = semver.parse(version).prerelease[0]
     } else {
         prerelease = false
     }
     // remove any dogfood details from version
     try {
-        version = semver.parse(version, { includePrerelease: false }).format()
+        version = `${semver.major(version)}.${semver.minor(version)}.${semver.patch(version)}`
     } catch {}
     // do we already have psychopy?
     let hasPsychoPy = await python.venv.getPackages(version).then(checkPackages)

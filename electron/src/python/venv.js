@@ -93,10 +93,10 @@ export class PythonVenv {
         }
         // install psychopy library
         if (!("psychopy" in installed || "psychopy-lib" in installed)) {
-            if (this.psychopyVersion === "dev") {
+            if (this.psychopyVersion === "dev" || prerelease === "dev") {
                 // for dev environment, install from dev branch
                 await this.installPackage("https://github.com/psychopy/psychopy/archive/refs/heads/dev.zip")
-            } else if (prerelease) {
+            } else if (prerelease === "release") {
                 // for prerelease, install from release branch
                 await this.installPackage("https://github.com/psychopy/psychopy/archive/refs/heads/release.zip")
             } else {
