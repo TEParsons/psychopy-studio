@@ -64,7 +64,6 @@
             <Pane defaultSize={1/5}>
                 <Panel 
                     title={translate("Files")}
-                    shortcut=f
                 >
                     <FileExplorer />
                 </Panel>
@@ -79,7 +78,6 @@
                 <Pane defaultSize={3/4}>
                     <Panel 
                         title={translate("Editor")}
-                        shortcut=e
                     >
                         <CoderNotebook />
                     </Panel>
@@ -91,7 +89,6 @@
                     <Pane defaultSize={1/4}>
                         <Panel 
                             title={translate("Console")}
-                            shortcut=c
                         >
                             <ShellNotebook />
                         </Panel>
@@ -106,7 +103,6 @@
         <Pane defaultSize={1/5}>
             <Panel 
                 title={translate("Outline")}
-                shortcut=o
             >
                 <OutlinePanel />
             </Panel>

@@ -27,10 +27,16 @@
 <div 
     class=listbook
 >
-    <div class=listbook-tabs>
+    <div 
+        class=listbook-tabs
+        role=tablist
+    >
         {@render children?.()}
     </div>
-    <div class=listbook-page>
+    <div 
+        class=listbook-page
+        role=tabpanel
+    >
         {@render pages.selected.page?.()}
     </div>
 </div>

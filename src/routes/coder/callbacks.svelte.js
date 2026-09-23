@@ -1,6 +1,6 @@
-import { electron, python, projects } from '$lib/globals.svelte.js';
-import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
-import { openIn, showDevTools } from "$lib/utils/views.svelte"
+import { electron, python } from '$lib/globals.svelte.js';
+import { browseFileOpen, browseFileSave } from "$lib/utils/files.js";
+import { openIn, showDevTools, focusNextPanel } from "$lib/utils/views.svelte"
 import { current } from './globals.svelte.js';
 import { Script } from "$lib/experiment";
 import { translate } from "$lib/translation";
@@ -173,7 +173,7 @@ export async function runJS() {
 
 /* Views */
 
-export { newWindow, showWindow, showDevTools } from "$lib/utils/views.svelte";
+export { newWindow, showWindow, showDevTools, focusNextPanel } from "$lib/utils/views.svelte";
 
 
 export var shortcuts = {
@@ -191,5 +191,6 @@ export var shortcuts = {
     runPython: runPython,
     stopPython: stopPython,
     runJS: runJS,
-    showDevTools: showDevTools
+    showDevTools: showDevTools,
+    focusNextPanel: focusNextPanel
 }

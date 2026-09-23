@@ -71,7 +71,6 @@
                 <Pane defaultSize={3/4}>
                     <Panel 
                         title={translate("Routines")} 
-                        shortcut=r
                     >
                         <RoutinesNotebook />
                     </Panel>
@@ -82,7 +81,6 @@
                 <Pane defaultSize={1/4}>
                     <Panel 
                         title={translate("Components")} 
-                        shortcut=c
                     >
                         <ComponentsPanel />
                     </Panel>
@@ -96,7 +94,6 @@
             <Panel 
                 title={translate("Flow")} 
                 hspan={4}
-                shortcut=f
             >
                 <FlowPanel />
             </Panel>
