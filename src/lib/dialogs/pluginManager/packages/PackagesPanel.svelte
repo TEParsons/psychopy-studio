@@ -93,6 +93,7 @@
         gap: 1rem;
         padding: 1rem;
         box-sizing: border-box;
+        overflow: hidden;
     }
 
     .packages-list, .package-details {
