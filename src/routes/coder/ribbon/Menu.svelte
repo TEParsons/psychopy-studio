@@ -311,7 +311,7 @@
                     label="{translate("PsychoPy")} {version}"
                     disabled
                 />
-                {#if version === "dev" || Version.parse(version).extra}
+                {#if version === "dev" || semver.parse(version).extra}
                     <MenuSeparator />
                     
                     <MenuItem
