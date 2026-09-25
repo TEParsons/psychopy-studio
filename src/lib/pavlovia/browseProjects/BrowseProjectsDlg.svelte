@@ -5,6 +5,7 @@
 
     let {
         shown=$bindable(),
+        page=$bindable(),
         awaiting=$bindable()
     } = $props()
 
