@@ -71,79 +71,100 @@
     shrink
 >
     <div class=container>
-        {#await git.getProjectInfo({
-            group: project.split("/")[0],
-            name: project.split("/")[1]
-        }, $state.snapshot(current.user))}
-            {translate("Getting project info...")}
-        {:then info}
-            <div class=project-title>
-                {#if info?.avatar_url}
-                    <img 
-                        style:height=8rem
-                        src={info.avatar_url} 
-                        alt="Project avatar"
-                    />
-                {/if}
-                <div>
-                    <h1>
-                        {info.name}
-                    </h1>
-                    <span>
-                        <a href={info.namespace.web_url}>
-                            {info.namespace.name}
-                        </a>
-                        /
-                        <a href={info.web_url}>
-                            {info.path}
-                        </a>
-                    </span>
+        {#if current.user}
+            {#await git.getProjectInfo({
+                group: project.split("/")[0],
+                name: project.split("/")[1]
+            }, $state.snapshot(current.user))}
+                {translate("Getting project info...")}
+            {:then info}
+                <div class=project-title>
+                    {#if info?.avatar_url}
+                        <img 
+                            style:height=8rem
+                            src={info.avatar_url} 
+                            alt="Project avatar"
+                        />
+                    {/if}
+                    <div>
+                        <h1>
+                            {info.name}
+                        </h1>
+                        <span>
+                            <a href={info.namespace.web_url}>
+                                {info.namespace.name}
+                            </a>
+                            /
+                            <a href={info.web_url}>
+                                {info.path}
+                            </a>
+                        </span>
+                    </div>
                 </div>
-            </div>
 
-            {@html marked(info.description || "")}
+                {@html marked(info.description || "")}
 
-            {#await projectsLoaded}
-                {translate("Checking whether project is synced...")}
-            {:then projects}
-                {#if project in projects}
-                    <Button 
-                        label={translate("Open file")}
-                        icon="/icons/btn-open.svg"
-                        onclick={evt => fileOpen(projects[project])}
-                        horizontal
-                    />
-                    {#await electron.files.scandir(projects[project], true) then files}
-                        {#each files.map(file => parsePath(file)) as file}
-                            {#if file.ext === ".psyexp"}
-                                <Button 
-                                    label={translate("Run {}").replace("{}", file.stem)}
-                                    icon="/icons/btn-runpy.svg"
-                                    onclick={evt => {
-                                        openIn(path.join(projects[project], file.file), "runner");
-                                        shown = false;
-                                    }}
-                                    horizontal
-                                />
-                            {/if}
-                        {/each}
-                    {/await}
-                {:else}
-                    <h3>Not synced</h3>
-                    {translate(
-                        "This project is not synced to your local machine. Would you like to fetch it from Pavlovia?"
-                    )}
-                    <div class=button-array>
-                        <Button
-                            label="Fetch"
-                            icon="/icons/btn-download.svg"
-                            onclick={clone}
+                {#await projectsLoaded}
+                    {translate("Checking whether project is synced...")}
+                {:then projects}
+                    {#if project in projects}
+                        <Button 
+                            label={translate("Open file")}
+                            icon="/icons/btn-open.svg"
+                            onclick={evt => fileOpen(projects[project])}
                             horizontal
                         />
-                    </div>
-                {/if}
+                        {#await electron.files.scandir(projects[project], true) then files}
+                            {#each files.map(file => parsePath(file)) as file}
+                                {#if file.ext === ".psyexp"}
+                                    <Button 
+                                        label={translate("Run {}").replace("{}", file.stem)}
+                                        icon="/icons/btn-runpy.svg"
+                                        onclick={evt => {
+                                            openIn(path.join(projects[project], file.file), "runner");
+                                            shown = false;
+                                        }}
+                                        horizontal
+                                    />
+                                {/if}
+                            {/each}
+                        {/await}
+                    {:else}
+                        <h3>Not synced</h3>
+                        {translate(
+                            "This project is not synced to your local machine. Would you like to fetch it from Pavlovia?"
+                        )}
+                        <div class=button-array>
+                            <Button
+                                label="Fetch"
+                                icon="/icons/btn-download.svg"
+                                onclick={clone}
+                                horizontal
+                            />
+                        </div>
+                    {/if}
+                {/await}
+            {:catch err}
+                {translate(
+                    "Failed to get project information. Server returned error: " + String(err)
+                )}
             {/await}
-        {/await}
+        {:else}
+            {translate(
+                "You must be logged in to Pavlovia to view projects."
+            )}
+            <Button
+                label={translate("Login")}
+                onclick={async evt => {
+                    let users = await git.listUsers();
+                    if (users.length) {
+                        current.user = users[0]
+                    } else {
+                        current.user = await git.login()
+                    }
+                }}
+            />
+        {/if}
     </div>
 </Dialog>
 
