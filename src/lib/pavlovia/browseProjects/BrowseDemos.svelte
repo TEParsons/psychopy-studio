@@ -1,5 +1,6 @@
 <script>
     import ProjectCard from "./ProjectCard.svelte";
+    import { PanelButton } from "$lib/utils/buttons"
     import { translate } from "$lib/translation";
 
     let requestDemos = fetch("https://pavlovia.org/api/v2/experiments?search=demos&designer=demos").then(
@@ -47,6 +48,21 @@
                 output[categ] = matchingDemos
             }
         }
+        // sort categs
+        output = Object.fromEntries(
+            Object.entries(output).toSorted(
+                ([keyA, valA], [keyB, valB]) => {
+                    // force "Featured" to the front
+                    if (keyA === "Featured") {
+                        return -1
+                    }
+                    // force "Other" to the end
+                    if (keyA === "Other") {
+                        return 1
+                    }
+                }
+            )
+        )
         
         return output
     }
@@ -62,7 +78,12 @@
     {#await requestDemos then demos}
         {@const filteredDemos = searchDemos(demos)}
         {#each Object.keys(filteredDemos) as categ}
-            <h1>{categ}</h1>
+        <PanelButton
+            open
+        >
+            {#snippet label()}
+                <h2>{categ}</h2>
+            {/snippet}
             <div class=card-array>
                 {#each filteredDemos[categ] as demo}
                     <ProjectCard 
@@ -70,6 +91,7 @@
                     />
                 {/each}
             </div>
+        </PanelButton>
         {/each}
     {/await}
 </div>
@@ -79,12 +101,11 @@
         display: flex;
         flex-direction: column;
         padding: 1rem;
-        width: 90rem;
+        width: 60rem;
     }
     .card-array {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         gap: .5rem;
     }
 </style>

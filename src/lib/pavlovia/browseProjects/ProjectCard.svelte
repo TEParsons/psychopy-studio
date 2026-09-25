@@ -30,7 +30,6 @@
         background-color: var(--base);
         border: 1px solid var(--overlay);
         border-radius: .5rem;
-        width: 16rem;
         padding: 1rem;
         overflow-y: auto;
         transition: border-color .2s, box-shadow .2s, background-color .2s, color .2s;
