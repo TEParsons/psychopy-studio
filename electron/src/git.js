@@ -637,7 +637,12 @@ export async function getProjectInfo({
     ).then(
         resp => resp.json()
     ).then(
-        resp => resp?.[0]
+        resp => {
+            if (resp.message && resp.message.startsWith("404")) {
+                throw Error(resp.message)
+            }
+            return resp?.[0]
+        }
     )
 }
 
