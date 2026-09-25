@@ -1,6 +1,6 @@
 <script>
     import { electron, git } from "$lib/globals.svelte";
-    import { Dialog } from "$lib/utils/dialog";
+    import { Dialog, MessageDialog } from "$lib/utils/dialog";
     import { Button } from "$lib/utils/buttons";
     import { parsePath, browseFileOpen } from "$lib/utils/files";
     import { openIn } from "$lib/utils/views.svelte";
@@ -17,6 +17,14 @@
     let projectsLoaded = $state.raw(
         git.loadProjects()
     )
+
+    let show = $state({
+        forkPrompt: false
+    })
+
+    let busy = $state({
+        cloning: Promise.resolve(false)
+    })
 
     let current = getContext("current");
 
@@ -41,7 +49,10 @@
         shown = false
     }
 
-    async function clone() {
+    /**
+     * Clone a a given remote project to this machine
+     */
+    async function clone(targetProject=project) {
         // prompt user to choose folder
         let folder = await electron.files.openDialog({
             title: translate("Choose folder for Pavlovia project"),
@@ -55,13 +66,31 @@
         // clone
         await git.clone(
             {
-                group: project.split("/")[0],
-                name: project.split("/")[1],
-                folder: path.join(folder[0], project.split("/")[1])
+                group: targetProject.split("/")[0],
+                name: targetProject.split("/")[1],
+                folder: path.join(folder[0], targetProject.split("/")[1])
             }, 
             $state.snapshot(current.user)
         )
+        // reload projects
         projectsLoaded = git.loadProjects()
+    }
+
+    /**
+     * Fork and clone the remote project to this machine
+     */
+    async function fork() {
+        // create fork
+        let newProject = await git.fork(
+            {
+                groupFrom: project.split("/")[0],
+                groupTo: $state.snapshot(current.user),
+                name: project.split("/")[1]
+            },
+            $state.snapshot(current.user)
+        )
+        // clone new project
+        return await clone(newProject)
     }
 </script>
 
@@ -138,9 +167,30 @@
                             <Button
                                 label="Fetch"
                                 icon="/icons/btn-download.svg"
-                                onclick={clone}
+                                onclick={async evt => {
+                                    if (current.user === info.namespace.name) {
+                                        // if this is their own project, clone it
+                                        return await clone()
+                                    } else {
+                                        // if not, ask if they want to fork it
+                                        show.forkPrompt = true
+                                    }
+                                }}
+                                bind:awaiting={busy.cloning}
                                 horizontal
                             />
+                            <MessageDialog
+                                title={translate("Fork project?")}
+                                buttons={{
+                                    YES: evt => fork(),
+                                    NO: evt => clone(project)
+                                }}
+                                bind:shown={show.forkPrompt}
+                            >
+                                {translate(
+                                    "This project belongs to {}, would you like to create a fork (copy) of it on your Pavlovia account?"
+                                ).replaceAll("{}", info.namespace.name)}
+                            </MessageDialog>
                         </div>
                     {/if}
                 {/await}
