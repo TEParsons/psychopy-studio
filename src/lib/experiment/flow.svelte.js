@@ -9,7 +9,7 @@ export class Flow {
         // construct flow
         let dynamic = [];
         let currentLoop = this;
-        for (let rt of this.flat) {
+        for (let [i, rt] of this.flat.entries()) {
             // iterate through a flattened flow
             if (rt instanceof LoopInitiator) {
                 // create a loop when we get to an initiator
@@ -41,10 +41,12 @@ export class Flow {
                     currentLoop = currentLoop.parent;
                 }
             } else {
+                // store routine alongside its index, as the same routine can appear more than once
+                let slot = {element: rt, index: i};
                 if (currentLoop instanceof Flow) {
-                    dynamic.push(rt);
+                    dynamic.push(slot);
                 } else {
-                    currentLoop.routines.push(rt);
+                    currentLoop.routines.push(slot);
                 }
             }
         }
@@ -77,10 +79,13 @@ export class Flow {
         this.flat.splice(index, 1);
     }
 
-    relocateElement(element, toIndex) {
-        // get element index
-        let fromIndex = this.flat.indexOf(element);
+    relocateElement(element, toIndex, fromIndex=undefined) {
+        // if not given, get element index (only reliable if element appears once in the flow)
+        if (fromIndex === undefined) {
+            fromIndex = this.flat.indexOf(element);
+        }
         // convert indices to int
+        fromIndex = parseInt(fromIndex);
         toIndex = parseInt(toIndex);
         // if this changes the indices, adjust
         if (toIndex > fromIndex) {
@@ -271,7 +276,7 @@ export class FlowLoop {
                     flat.push(rt.terminator);
                 }
             } else {
-                flat.push(rt);
+                flat.push(rt.element);
             }
         }
 
@@ -281,6 +286,7 @@ export class FlowLoop {
 
 export class LoopInitiator extends HasParams {
 
+    terminator = $state(undefined);
     loopType = $derived(() => this.params['loopType'].val);
     complete = $derived(this.terminator !== undefined);
     index = $derived(this.exp.flow.flat.indexOf(this))
@@ -288,7 +294,6 @@ export class LoopInitiator extends HasParams {
     constructor(tag) {
         super(tag);
         this.exp = undefined;
-        this.terminator = undefined;
     }
 
     addTerminator() {

@@ -45,9 +45,10 @@
             // update history
             current.experiment.history.update(`move ${current.moving.name} in flow`);
             // relocate it
-            current.experiment.flow.relocateElement(current.moving, index)
+            current.experiment.flow.relocateElement(current.moving, index, current.movingIndex)
             // done dragging
             current.moving = undefined
+            current.movingIndex = undefined
         }
         // if inserting, insert element here
         if (current.inserting) {

@@ -16,6 +16,8 @@ export let current = $state({
     },
     routine: undefined,
     moving: undefined,
+    // index in the flow of the element being moved (as the same routine can appear more than once)
+    movingIndex: undefined,
     inserting: undefined,
     clipboard: new Clipboard(),
     // setting this as false mutes "Python error..." popups
