@@ -10,7 +10,8 @@
     let current = getContext("current");
 
     let {
-        element=$bindable()
+        element=$bindable(),
+        index=undefined
     } = $props()
 
     let show = $state({
@@ -28,7 +29,7 @@
         // update history
         current.experiment.history.update(`remove ${element.name}`);
         // remove this element from the flow
-        current.experiment.flow.removeElement(element.index)
+        current.experiment.flow.removeElement(index)
     }
     
     $effect(() => {
@@ -39,7 +40,7 @@
 
 </script>
 
-<EntryPoint index={element.index}></EntryPoint>
+<EntryPoint index={index}></EntryPoint>
 <button 
     class=routine 
     draggable={true}
@@ -47,8 +48,14 @@
     onmouseleave={() => {show.tooltip = false}}
     onfocusin={() => {show.tooltip = true}}
     onfocusout={() => {show.tooltip = false}}
-    ondragstart={() => current.moving = element} 
-    ondragend={() => current.moving = undefined} 
+    ondragstart={() => {
+        current.moving = element;
+        current.movingIndex = index;
+    }}
+    ondragend={() => {
+        current.moving = undefined;
+        current.movingIndex = undefined;
+    }}
     onclick={() => current.routine = element}
     class:active={current.routine ? current.routine.name === element.name : false}
     class:disabled={element.disabled}

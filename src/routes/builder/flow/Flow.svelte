@@ -27,7 +27,7 @@
                     {#if emt instanceof FlowLoop}
                         <LoopNode bind:element={emt} />
                     {:else}
-                        <RoutineNode bind:element={emt} />
+                        <RoutineNode bind:element={emt.element} index={emt.index} />
                     {/if}
                 </div>
             {/each}

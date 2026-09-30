@@ -97,7 +97,7 @@
             {#if element.routines[i] instanceof FlowLoop}
                 <Loop bind:element={element.routines[i]} />
             {:else}
-                <RoutineNode bind:element={element.routines[i]} />
+                <RoutineNode bind:element={element.routines[i].element} index={element.routines[i].index} />
             {/if}
         {/each}
     {/if}
