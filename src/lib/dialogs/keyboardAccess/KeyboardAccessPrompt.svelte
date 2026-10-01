@@ -10,7 +10,10 @@
         if (!experiment?.needsKeyboardAccess) {
             return
         }
-        
+        // skip if already asked
+        if (experiment?.prompts?.keyboardAccess) {
+            return
+        }
         // does the experiment need keyboard permissions?
         experiment.needsKeyboardAccess().then(
             async needs => {
@@ -20,6 +23,8 @@
                 }
                 // request access
                 await electron.system.requestKeyboardAccess()
+                // mark as already asked
+                experiment.prompts.keyboardAccess = true
             }
         )
     })

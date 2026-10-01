@@ -17,6 +17,11 @@ export class Experiment {
     file = $state(undefined)
     running = $state.raw(undefined)
 
+    /** keep track of any prompts which have already been prompted for this experiment */
+    prompts = {
+        keyboardAccess: false
+    }
+
     /** store past and future states for this experiment */
     history = $state({
         past: [],
@@ -261,6 +266,10 @@ export class Experiment {
             name: "untitled.psyexp",
             stem: "untitled",
             ext: ".psyexp"
+        }
+        // mark all prompts as unasked
+        for (let key in this.prompts) {
+            this.prompts[key] = false
         }
         // set to current version
         this.version = "2026.1.0"
