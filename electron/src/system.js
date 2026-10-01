@@ -7,7 +7,7 @@ export async function requestKeyboardAccess() {
         return
     }
     // get permissions package
-    let permissions = await import("node-mac-permissions")
+    let permissions = (await import("node-mac-permissions")).default
     // request permission for input monitoring (only prompts if not yet determined)
     if (permissions.getAuthStatus("input-monitoring") !== "authorized") {
         permissions.askForInputMonitoringAccess()
@@ -28,7 +28,7 @@ export async function hasKeyboardAccess() {
         return true
     }
     // get permissions package
-    let permissions = await import("node-mac-permissions")
+    let permissions = (await import("node-mac-permissions")).default
     // check permissions
     return (
         permissions.getAuthStatus("input-monitoring") === "authorized" 
