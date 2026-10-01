@@ -11,16 +11,21 @@ export class PythonScript {
         // store file and args
         this.file = file
         this.args = args
+        // unique id to refer to this script by
+        this.id = randomUUID()
         // populated upon start
         this.process = undefined
         this.finished = undefined
     }
 
-    async run() {
+    /**
+     * Start running this script, without waiting for it to finish.
+     *
+     * @returns {string} ID of this script, which can be used to wait for or stop it
+     */
+    start() {
         // setup promise to track progress
         this.finished = Promise.withResolvers()
-        // mark started
-        output("stdout", `--- Started ${this.file} ---`)
         // split file into name and dir
         let folder = path.dirname(this.file)
         let file = path.basename(this.file)
@@ -36,12 +41,23 @@ export class PythonScript {
         // await completion/error
         this.process.on("exit", (code, signal) => this.finished.resolve([code, signal]))
         this.process.on("error", err => this.finished.reject(err))
-        // wait until finished
-        let result = await this.finished.promise
-        // mark finished
-        output("stdout", `--- Finished ${this.file} ---`)
+        // register with venv so it can be found (and killed on quit)
+        this.venv.scripts[this.id] = this
+        // deregister once done
+        this.finished.promise.finally(() => {
+            delete this.venv.scripts[this.id]
+        }).catch(() => {})
 
-        return result
+        return this.id
+    }
+
+    /**
+     * Wait for this script to finish.
+     *
+     * @returns {Array} Exit code and signal of the process
+     */
+    async wait() {
+        return await this.finished.promise
     }
 
     stop() {

@@ -653,6 +653,12 @@ export class Experiment {
             "--prefs-json",
             await electron.paths.prefs()
         )
+        // wait for it to finish
+        await python.scripts.wait(version, this.running)
+        // if stopped manually, stopPython will have already marked it stopped
+        if (this.running === undefined) {
+            return
+        }
         // mark finished
         this.running = undefined
         await python.output.stdout.send(
@@ -672,10 +678,11 @@ export class Experiment {
         }
         // figure out version
         let version = $state.snapshot(this.settings.params['Use version'].val) || "app"
-        // request stop from electron
-        await python.scripts.stop(version, this.running)
-        // mark finished
+        // mark finished (before stopping, so runPython knows it was stopped manually)
+        let id = this.running
         this.running = undefined
+        // request stop from electron
+        await python.scripts.stop(version, id)
         await python.output.stdout.send(
             `--- Stopped experiment ${this.file.name} ---`
         )

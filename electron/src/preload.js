@@ -107,6 +107,7 @@ const python = {
   },
   scripts: {
     run: (venv, file, ...args) => ipcRenderer.invoke("python.scripts.run", venv, file, ...args).then(resp => resp),
+    wait: (venv, id) => ipcRenderer.invoke("python.scripts.wait", venv, id).then(resp => resp),
     stop: (venv, id) => ipcRenderer.invoke("python.scripts.stop", venv, id).then(resp => resp),
   },
   psychojs: {
