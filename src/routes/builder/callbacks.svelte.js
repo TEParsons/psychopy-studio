@@ -291,12 +291,6 @@ export async function runPython() {
     if (!python) {
         return
     }
-    // request keyboard access on Mac
-    if (await current.experiment.needsKeyboardAccess()) {
-        if (!(await electron.system.hasKeyboardAccess())) {
-            await electron.system.requestKeyboardAccess()
-        }
-    }
     // if no file, save as
     if (current.experiment.file?.file === undefined) {
         await file_save_as()

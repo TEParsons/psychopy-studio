@@ -316,11 +316,10 @@ export class Experiment {
 
     async needsKeyboardAccess() {
         // we always need this for ioHub or ptb
-        if (["ioHub", "psychtoolbox"].includes(this.settings.params['keyboardBackend']?.val)) {
-            return true
-        }
-        // if the GIL is enabled, then we always need this
-        if (await python.venv.hasGIL(this.useVersion)) {
+        if (
+            this.settings.params['useLegacyKeyboard']?.val 
+            && ["ioHub", "PsychToolbox"].includes(this.settings.params['keyboardBackend']?.val)
+        ) {
             return true
         }
         // get all Components
@@ -332,9 +331,17 @@ export class Experiment {
             []
         )
         // do any keyboards need keypresses outside PsychoPy
-        return comps.some(
-            comp => comp.tag === "KeyboardComponent" && !comp.params['muteOutsidePsychoPy']?.val
-        )
+        if (comps.some(
+            comp => comp.tag === "KeyboardComponent" && !comp.params['muteOutsidePsychopy']?.val
+        )) {
+            return true
+        }
+        // if the gil is enabled, we always need keyboard permission
+        if (await python.venv.hasGIL(this.useVersion)) {
+            return true
+        }
+
+        return false
     }
 
     pilotMode = $derived(![true, "true", "True", 1, "1"].includes(this.settings.params['runMode']?.val))
