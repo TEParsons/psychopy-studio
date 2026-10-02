@@ -405,6 +405,31 @@ export function clearProjects() {
 
 
 /**
+ * Add a user's access token to a URL, so it can be used to make authenticated requests to Pavlovia
+ * 
+ * @param {string|URL} url URL to authenticate (if given as a URL object, it will be modified in place)
+ * @param {string} username Username to authenticate as, if not given (or not logged in) URL is left unchanged
+ * 
+ * @returns {URL} The authenticated URL
+ */
+export async function authenticateURL(url, username) {
+    // make sure we have a URL object
+    if (!(url instanceof URL)) {
+        url = new URL(url)
+    }
+    // apply auth
+    if (username && username in users) {
+        url.searchParams.set(
+            "access_token", 
+            await users[username].getToken()
+        )
+    }
+
+    return url
+}
+
+
+/**
  * Get the details of a specific group
  * 
  * @param {string} group Group to get details for
@@ -416,12 +441,7 @@ export async function getGroup(group, username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups/${group}`)
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // get groups
     let resp = await fetch(
         url.toString()
@@ -437,12 +457,7 @@ export async function listGroups(username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups`)
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // get groups
     return await fetch(
         url.toString()
@@ -484,12 +499,7 @@ export async function listProjectForks(project, username) {
     // create URL
     let url = new URL(`${server}/api/v4/projects/${encodeURIComponent(`${project}`)}/forks`)
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // get forks
     return await fetch(
         url.toString()
@@ -650,12 +660,7 @@ export async function getProjectInfo({
     // create search url
     let url = new URL(`https://gitlab.pavlovia.org/api/v4/${isGroup ? "groups" : "users"}/${group}/projects?search=${name}`)    
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // search for project
     return await fetch(
         url.toString()
@@ -937,6 +942,7 @@ export const handlers = {
     listGroups: ipcMain.handle("git.listGroups", (evt, username) => listGroups(username)),
     listSurveys: ipcMain.handle("git.listSurveys", (evt, username) => listSurveys(username)),
     getUserInfo: ipcMain.handle("git.getUserInfo", (evt, username) => users[username]?.profile),
+    authenticateURL: ipcMain.handle("git.authenticateURL", async (evt, url, username) => (await authenticateURL(url, username)).toString()),
     getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => getRemote(folder, user)),
     getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, details, username) => getProjectInfo(details, username)),
     clone: ipcMain.handle("git.clone", (evt, details, username) => clone(details, username)),

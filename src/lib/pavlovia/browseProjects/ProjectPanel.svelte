@@ -93,7 +93,7 @@
     /**
      * Download files from remote project, detached (not cloned)
      */
-    async function download() {
+    async function download(targetProject=project) {
         // prompt user to choose folder
         let folder = await electron.files.openDialog({
             title: translate("Choose folder for downloaded project"),
@@ -104,7 +104,17 @@
         if (!folder) {
             return
         }
-        
+        // create authenticated url
+        let url = await git.authenticateURL(
+            `https://gitlab.pavlovia.org/api/v4/projects/${encodeURIComponent(targetProject)}/repository/archive.zip`,
+            $state.snapshot(current.user)
+        )
+        console.log(url)
+        // download folder
+        await electron.files.downloadFolder(
+            url,
+            folder[0]
+        )
     }
 </script>
 
@@ -189,7 +199,7 @@
         <Button 
             label={translate("Download files")}
             icon="/icons/btn-download.svg"
-            onclick={download}
+            onclick={evt => download(name)}
             horizontal
         />
         <Button 

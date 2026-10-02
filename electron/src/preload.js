@@ -129,6 +129,7 @@ const git = {
   listGroups: (username) => ipcRenderer.invoke("git.listGroups", username).then(resp => resp),
   listSurveys: (username) => ipcRenderer.invoke("git.listSurveys", username).then(resp => resp),
   getUserInfo: (username) => ipcRenderer.invoke("git.getUserInfo", username).then(resp => resp),
+  authenticateURL: (url, username) => ipcRenderer.invoke("git.authenticateURL", url, username).then(resp => resp),
   getRemote: (folder, user) => ipcRenderer.invoke("git.getRemote", folder, user).then(resp => resp),
   getProjectInfo: (details, username) => ipcRenderer.invoke("git.getProjectInfo", details, username).then(resp => resp),
   clone: (details, username) => ipcRenderer.invoke("git.clone", details, username).then(resp => resp),
