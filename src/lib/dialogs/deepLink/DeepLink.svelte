@@ -7,6 +7,7 @@
     import { getContext } from "svelte";
     import { marked } from "marked";
     import { translate } from "$lib/translation";
+    import ProjectCard from "$lib/pavlovia/browseProjects/ProjectCard.svelte"
     import path from "path-browserify";
 
     let {
@@ -14,9 +15,7 @@
         shown=$bindable()
     } = $props();
 
-    let projectsLoaded = $state.raw(
-        git.loadProjects()
-    )
+    let current = getContext("current");
 
     let show = $state({
         forkPrompt: false
@@ -26,7 +25,9 @@
         cloning: Promise.resolve(false)
     })
 
-    let current = getContext("current");
+    let projectsLoaded = $state.raw(
+        git.loadProjects()
+    )
 
     async function fileOpen(folder) {
         // browse files
@@ -94,6 +95,87 @@
     }
 </script>
 
+{#snippet syncCtrls(name)}
+    {#await projectsLoaded}
+        {translate("Checking whether {} is synced...").replace("{}", name)}
+    {:then projects}
+        <h3>{translate("Local files")}</h3>
+        {#if project in projects}
+            <Button 
+                label={translate("Open file")}
+                icon="/icons/btn-open.svg"
+                onclick={evt => fileOpen(projects[project])}
+                horizontal
+            />
+            {#await electron.files.scandir(projects[project], true) then files}
+                {#each files.map(file => parsePath(file)) as file}
+                    {#if file.ext === ".psyexp"}
+                        <Button 
+                            label={translate("Run {}").replace("{}", file.stem)}
+                            icon="/icons/btn-runpy.svg"
+                            onclick={evt => {
+                                openIn(path.join(projects[project], file.file), "runner");
+                                shown = false;
+                            }}
+                            horizontal
+                        />
+                    {/if}
+                {/each}
+            {/await}
+        {:else}
+            {translate(
+                "{} is not synced to your local machine. Would you like to fetch it from Pavlovia?"
+            ).replace("{}", name)}
+            <div class=button-array>
+                <Button
+                    label="Fetch"
+                    tooltip={translate("Get this project from Pavlovia")}
+                    icon="/icons/btn-download.svg"
+                    onclick={async evt => {
+                        if (current.user === info.namespace.name) {
+                            // if this is their own project, clone it
+                            return await clone()
+                        } else {
+                            // if not, ask if they want to fork it
+                            show.forkPrompt = true
+                        }
+                    }}
+                    bind:awaiting={busy.cloning}
+                    horizontal
+                />
+                <MessageDialog
+                    title={translate("Fork project?")}
+                    buttons={{
+                        YES: evt => fork(),
+                        NO: evt => clone(project)
+                    }}
+                    bind:shown={show.forkPrompt}
+                >
+                    {translate(
+                        "This project belongs to {}, would you like to create a fork (copy) of it on your Pavlovia account?"
+                    ).replaceAll("{}", info.namespace.name)}
+                </MessageDialog>
+                <Button
+                    label="Find"
+                    tooltip={translate("Point to a local clone of this project")}
+                    icon="/icons/btn-open.svg"
+                    onclick={async evt => {
+                        if (current.user === info.namespace.name) {
+                            // if this is their own project, clone it
+                            return await clone()
+                        } else {
+                            // if not, ask if they want to fork it
+                            show.forkPrompt = true
+                        }
+                    }}
+                    bind:awaiting={busy.cloning}
+                    horizontal
+                />
+            </div>
+        {/if}
+    {/await}
+{/snippet}
+
 <Dialog
     title="Opening {project}..."
     bind:shown={shown}
@@ -132,72 +214,32 @@
                 </div>
 
                 {@html marked(info.description || "")}
-
-                {#await projectsLoaded}
-                    {translate("Checking whether project is synced...")}
-                {:then projects}
-                    {#if project in projects}
-                        <Button 
-                            label={translate("Open file")}
-                            icon="/icons/btn-open.svg"
-                            onclick={evt => fileOpen(projects[project])}
-                            horizontal
-                        />
-                        {#await electron.files.scandir(projects[project], true) then files}
-                            {#each files.map(file => parsePath(file)) as file}
-                                {#if file.ext === ".psyexp"}
-                                    <Button 
-                                        label={translate("Run {}").replace("{}", file.stem)}
-                                        icon="/icons/btn-runpy.svg"
-                                        onclick={evt => {
-                                            openIn(path.join(projects[project], file.file), "runner");
-                                            shown = false;
-                                        }}
-                                        horizontal
-                                    />
-                                {/if}
-                            {/each}
-                        {/await}
-                    {:else}
-                        <h3>Not synced</h3>
-                        {translate(
-                            "This project is not synced to your local machine. Would you like to fetch it from Pavlovia?"
-                        )}
-                        <div class=button-array>
-                            <Button
-                                label="Fetch"
-                                icon="/icons/btn-download.svg"
-                                onclick={async evt => {
-                                    if (current.user === info.namespace.name) {
-                                        // if this is their own project, clone it
-                                        return await clone()
-                                    } else {
-                                        // if not, ask if they want to fork it
-                                        show.forkPrompt = true
-                                    }
-                                }}
-                                bind:awaiting={busy.cloning}
-                                horizontal
-                            />
-                            <MessageDialog
-                                title={translate("Fork project?")}
-                                buttons={{
-                                    YES: evt => fork(),
-                                    NO: evt => clone(project)
-                                }}
-                                bind:shown={show.forkPrompt}
-                            >
-                                {translate(
-                                    "This project belongs to {}, would you like to create a fork (copy) of it on your Pavlovia account?"
-                                ).replaceAll("{}", info.namespace.name)}
-                            </MessageDialog>
-                        </div>
-                    {/if}
-                {/await}
             {:catch err}
                 {translate(
                     "Failed to get project information. Server returned error: " + String(err)
                 )}
+            {/await}
+            
+            {@render syncCtrls(project)}
+
+            {#await git.listProjectForks(
+                project,
+                current.user
+            ).then(
+                forks => forks.filter(
+                    fork => fork.permissions.project_access?.access_level >= 30
+                )
+            ) then forks}
+                {console.log(forks)}
+                {#if forks.length}
+                    <h3>Your forks</h3>
+                    {translate("There are forks (copies) of this project on Pavlovia which you have access to:")}
+                    {#each forks as fork}
+                        <ProjectCard
+                            demo={fork}
+                         />
+                    {/each}
+                {/if}
             {/await}
         {:else}
             {translate(
@@ -233,6 +275,12 @@
     }
 
     .project-title {
+        display: flex;
+        flex-direction: row;
+        gap: .5rem;
+    }
+
+    .button-array {
         display: flex;
         flex-direction: row;
         gap: .5rem;
