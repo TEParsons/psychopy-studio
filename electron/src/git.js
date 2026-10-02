@@ -474,6 +474,31 @@ export async function listSurveys(username) {
 }
 
 
+/**
+ * List forks of a given project
+ * 
+ * @param {string} project Project to list forks for (namespace/name) 
+ * @param {string} username Use to authenticate as 
+ */
+export async function listProjectForks(project, username) {
+    // create URL
+    let url = new URL(`${server}/api/v4/projects/${encodeURIComponent(`${project}`)}/forks`)
+    // apply auth
+    if (username && username in users) {
+        url.searchParams.set(
+            "access_token", 
+            await users[username].getToken()
+        )
+    }
+    // get forks
+    return await fetch(
+        url.toString()
+    ).then(
+        resp => resp.json()
+    )
+}
+
+
 export async function newProject(details, folder, username) {
     // initialise local repo
     await git.init({ 
@@ -916,6 +941,7 @@ export const handlers = {
     getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, details, username) => getProjectInfo(details, username)),
     clone: ipcMain.handle("git.clone", (evt, details, username) => clone(details, username)),
     fork: ipcMain.handle("git.fork", (evt, details, username) => fork(details, username)),
+    listProjectForks: ipcMain.handle("git.listProjectForks", (evt, project, username) => listProjectForks(project, username)),
     pull: ipcMain.handle("git.pull", (evt, folder, user, force=true) => pull(folder, user, force)),
     stage: ipcMain.handle("git.stage", (evt, folder) => stage(folder)),
     commit: ipcMain.handle("git.commit", (evt, message, folder, user) => commit(message, folder, user)),

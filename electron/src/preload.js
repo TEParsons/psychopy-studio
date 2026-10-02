@@ -132,6 +132,7 @@ const git = {
   getProjectInfo: (details, username) => ipcRenderer.invoke("git.getProjectInfo", details, username).then(resp => resp),
   clone: (details, username) => ipcRenderer.invoke("git.clone", details, username).then(resp => resp),
   fork: (details, username) => ipcRenderer.invoke("git.fork", details, username).then(resp => resp),
+  listProjectForks: (project, username) => ipcRenderer.invoke("git.listProjectForks", project, username).then(resp => resp),
   pull: (folder, user, force=true) => ipcRenderer.invoke("git.pull", folder, user, force).then(resp => resp),
   stage: (folder) => ipcRenderer.invoke("git.stage", folder).then(resp => resp),
   commit: (message, folder, user) => ipcRenderer.invoke("git.commit", message, folder, user).then(resp => resp),
