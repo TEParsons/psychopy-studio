@@ -95,7 +95,7 @@
                 onclick={evt => current.runlist[current.selection]?.runPython()}
                 disabled={current.selection === undefined}
                 bind:awaiting={current.awaiting.runpy}
-                cancel={python.scripts.stop}
+                cancel={evt => current.runlist[current.selection]?.stopPython()}
                 borderless
             />
             <IconButton 
