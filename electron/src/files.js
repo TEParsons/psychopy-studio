@@ -1,5 +1,6 @@
 import { ipcMain, dialog, shell } from "electron";
 import fs from "node:fs";
+import https from "node:https";
 import path from "node:path";
 import { extract as unzip } from "@electron-internal/extract-zip";
 import { extract as untar } from "tar";
@@ -138,9 +139,28 @@ export async function downloadFolder(
 ) {
     // get filename from url
     let filename = URL.parse(url).pathname.split("/").at(-1)
-    // get file content as a blob
-    let data = await fetch(url).then(resp => resp.blob()).then(blob => blob.bytes())
-    // write to a zipped file
+    // get file content (using https rather than fetch, as GitLab rejects fetch's `Sec-Fetch-Mode: cors` header)
+    let get = (url) => new Promise((resolve, reject) => {
+        https.get(url, resp => {
+            // follow redirects
+            if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
+                resp.resume()
+                return get(new URL(resp.headers.location, url)).then(resolve, reject)
+            }
+            // reject on error status
+            if (resp.statusCode < 200 || resp.statusCode >= 300) {
+                resp.resume()
+                return reject(new Error(`Failed to download from ${URL.parse(url).origin}: ${resp.statusCode} ${resp.statusMessage}`))
+            }
+            // collect content
+            let chunks = []
+            resp.on("data", chunk => chunks.push(chunk))
+            resp.on("end", () => resolve(Buffer.concat(chunks)))
+            resp.on("error", reject)
+        }).on("error", reject)
+    })
+    let data = await get(url)
+    // write to a zipped fil
     let zipfile = path.join(target, filename);
     fs.writeFileSync(zipfile, data);
     // extract file
