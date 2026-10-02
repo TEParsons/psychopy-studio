@@ -38,7 +38,8 @@ const electron = {
     scandir: (root) => ipcRenderer.invoke("electron.files.scandir", root).then(resp => resp),
     showItemInFolder: (folder) => ipcRenderer.invoke("electron.files.showItemInFolder", folder),
     openPath: (path) => ipcRenderer.invoke("electron.files.openPath", path),
-    openExternal: (url) => ipcRenderer.invoke("electron.files.openExternal", url)
+    openExternal: (url) => ipcRenderer.invoke("electron.files.openExternal", url),
+    downloadFolder: (url, target) => ipcRenderer.invoke("electron.files.downloadFolder", url, target)
   },
   clipboard: {
     get: () => ipcRenderer.invoke("electron.clipboard.get").then(resp => resp),
