@@ -39,7 +39,7 @@ const electron = {
     showItemInFolder: (folder) => ipcRenderer.invoke("electron.files.showItemInFolder", folder),
     openPath: (path) => ipcRenderer.invoke("electron.files.openPath", path),
     openExternal: (url) => ipcRenderer.invoke("electron.files.openExternal", url),
-    downloadFolder: (url, target) => ipcRenderer.invoke("electron.files.downloadFolder", url, target)
+    downloadFolder: (url, target, name) => ipcRenderer.invoke("electron.files.downloadFolder", url, target, name)
   },
   clipboard: {
     get: () => ipcRenderer.invoke("electron.clipboard.get").then(resp => resp),
@@ -141,5 +141,6 @@ const git = {
   push: (folder, user, force=false) => ipcRenderer.invoke("git.push", folder, user, force).then(resp => resp),
   newProject: (details, folder, user) => ipcRenderer.invoke("git.newProject", details, folder, user).then(resp => resp),
   loadProjects: () => ipcRenderer.invoke("git.loadProjects").then(resp => resp),
+  linkProject: (key, folder) => ipcRenderer.invoke("git.linkProject", key, folder).then(resp => resp),
 }
 contextBridge.exposeInMainWorld('git', git)

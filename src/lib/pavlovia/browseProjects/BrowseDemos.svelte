@@ -94,6 +94,7 @@
                             {#each filteredDemos[categ] as demo}
                                 <button 
                                     class=project-card
+                                    class:selected={selectedDemo === demo.pathWithNamespace}
                                     onclick={evt => selectedDemo = demo.pathWithNamespace}
                                 >
                                     <h4>{demo.name.replaceAll("_", " ")}</h4>
@@ -175,9 +176,10 @@
             inset 1px 1px 10px rgba(0, 0, 0, 0.05)
         ;
     }
-    .project-card h3 {
-        overflow-x: auto;
-        white-space: wrap;
-        width: 100%;
+    .project-card.selected {
+        border-color: var(--blue);
+        box-shadow: 
+            inset 1px 1px 10px rgba(0, 0, 0, 0.05)
+        ;
     }
 </style>

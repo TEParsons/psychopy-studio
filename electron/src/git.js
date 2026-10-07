@@ -405,6 +405,22 @@ export function clearProjects() {
 
 
 /**
+ * Store a reference to a project's local folder in the known projects list
+ *
+ * @param {string} key Key of the project, in the format `group/name`
+ * @param {string} folder Local folder the project is in
+ */
+export function linkProject(key, folder) {
+    // load projects
+    loadProjects()
+    // store reference in known projects list
+    projects[key] = folder
+    // save projects
+    saveProjects()
+}
+
+
+/**
  * Add a user's access token to a URL, so it can be used to make authenticated requests to Pavlovia
  * 
  * @param {string|URL} url URL to authenticate (if given as a URL object, it will be modified in place)
@@ -525,8 +541,7 @@ export async function newProject(details, folder, username) {
     // setup gitignore
     setupGitIgnore(folder)
     // store reference
-    projects[`${details.group}/${details.name}`] = folder
-    saveProjects()
+    linkProject(`${details.group}/${details.name}`, folder)
     // stage and commit all local files
     await stage(folder)
     await commit("Create project", folder, username)
@@ -609,12 +624,10 @@ export async function getRemote(folder, username=undefined) {
         return null
     }
     // store reference in known projects list
-    loadProjects()
     let key = remote.match(`${RegExp.escape(server)}\/(.*?).git$`)?.[1]
     if (key) {
-        projects[key] = folder
+        linkProject(key, folder)
     }
-    saveProjects()
     // parse to a URL
     let url = new URL(remote)
     // apply auth
@@ -698,8 +711,7 @@ export async function clone({
         onMessage: output
     })
     // store reference in known projects list
-    projects[`${group}/${name}`] = folder
-    saveProjects()
+    linkProject(`${group}/${name}`, folder)
     // log
     output(`Finished cloning repo.`)
 }
@@ -953,5 +965,6 @@ export const handlers = {
     commit: ipcMain.handle("git.commit", (evt, message, folder, user) => commit(message, folder, user)),
     push: ipcMain.handle("git.push", (evt, folder, user, force=false) => push(folder, user, force)),
     newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => newProject(details, folder, user)),
-    loadProjects: ipcMain.handle("git.loadProjects", (evt) => loadProjects())
+    loadProjects: ipcMain.handle("git.loadProjects", (evt) => loadProjects()),
+    linkProject: ipcMain.handle("git.linkProject", (evt, key, folder) => linkProject(key, folder))
 }

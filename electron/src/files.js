@@ -132,10 +132,12 @@ export function openExternal(url) {
  * 
  * @param {string} url URL to zip/tar file to download
  * @param {string} target Folder path to extract folder to
+ * @param {string|undefined} name Name to give the extracted folder; leave as undefined to use the name it has online
  */
 export async function downloadFolder(
     url,
-    target
+    target,
+    name=undefined
 ) {
     // get filename from url
     let filename = URL.parse(url).pathname.split("/").at(-1)
@@ -160,27 +162,36 @@ export async function downloadFolder(
         }).on("error", reject)
     })
     let data = await get(url)
-    // write to a zipped fil
+    // write to a zipped file
     let zipfile = path.join(target, filename);
     fs.writeFileSync(zipfile, data);
+    // create temp folder to extract to
+    let tmp = fs.mkdtempSync(
+        path.join(target, filename.split(".")[0])
+    )
     // extract file
     if (path.extname(zipfile) === ".zip") {
         // extract zip file...
         await unzip(zipfile, {
-            dir: target
+            dir: tmp
         })
     }
     if (path.extname(zipfile) === ".gz") {
         // extract tar.gz file...
         await untar({
             file: zipfile,
-            cwd: target,
-            strip: 1,
+            cwd: tmp,
             sync: true
         })
     }
-    // delete zip file
+    // if the archive has one top-level folder, use that as the root
+    let contents = fs.readdirSync(tmp, { withFileTypes: true })
+    let root = contents.length === 1 && contents[0].isDirectory() ? path.join(tmp, contents[0].name) : tmp
+    // move it into place under the requested name
+    fs.renameSync(root, path.join(target, name ?? path.basename(root)))
+    // delete zip file and temp folder
     fs.unlink(zipfile, err => {if (err) throw err})
+    fs.rmSync(tmp, { recursive: true, force: true })
 }
 
 
@@ -199,5 +210,5 @@ export const handlers = {
     showItemInFolder: ipcMain.handle("electron.files.showItemInFolder", (evt, folder) => showItemInFolder(folder)),
     openPath: ipcMain.handle("electron.files.openPath", (evt, target) => openPath(target)),
     openExternal: ipcMain.handle("electron.files.openExternal", (evt, url) => openExternal(url)),
-    downloadFolder: ipcMain.handle("electron.files.downloadFolder", (evt, url, target) => downloadFolder(url, target))
+    downloadFolder: ipcMain.handle("electron.files.downloadFolder", (evt, url, target, name) => downloadFolder(url, target, name))
 }

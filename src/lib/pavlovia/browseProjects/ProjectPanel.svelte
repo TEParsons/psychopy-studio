@@ -109,12 +109,18 @@
             `https://gitlab.pavlovia.org/api/v4/projects/${encodeURIComponent(targetProject)}/repository/archive.zip`,
             $state.snapshot(current.user)
         )
-        console.log(url)
+        // create filename
+        let filename = targetProject.split("/").at(-1)
         // download folder
         await electron.files.downloadFolder(
             url,
-            folder[0]
+            folder[0],
+            filename
         )
+        // add to projects.json
+        await git.linkProject(targetProject, path.join(folder[0], filename))
+        // reload projects
+        projectsLoaded = git.loadProjects()
     }
 </script>
 
@@ -126,7 +132,7 @@
     <div class=button-array>
         <Button
             label="Clone"
-            icon="/icons/btn-sync.svg"
+            icon="/icons/btn-download.svg"
             onclick={async evt => {
                 if (current.user === info.namespace.name) {
                     // if this is their own project, clone it
@@ -165,7 +171,10 @@
 {/snippet}
 
 <!-- controls to open a synced project -->
-{#snippet openCtrls(name, folder)}
+{#snippet openCtrls(folder)}
+    {translate(
+        "You have this demo downloaded already, use the buttons below to open or run it."
+    )}
     <div class=button-array>
         <Button 
             label={translate("Open file")}
@@ -246,13 +255,14 @@
             {@html marked(info.description || "")}
         
             {#await projectsLoaded}
-                {translate("Checking whether {} is synced...").replace("{}", name)}
+                {translate("Checking whether {} is synced...").replace("{}", project)}
             {:then projects}
                 <h3>{translate("Local files")}</h3>
-                {#if project.startsWith("demos/")}
-                    {@render demoCtrls(project)}
-                {:else if project in projects}
+                
+                {#if project in projects}
                     {@render openCtrls(projects[project])}
+                {:else if project.startsWith("demos/")}
+                    {@render demoCtrls(project)}
                 {:else}
                     {@render fetchCtrls(project, info)}
                 {/if}
@@ -309,7 +319,7 @@
     .project-title {
         display: flex;
         flex-direction: row;
-        gap: .5rem;
+        gap: 1rem;
     }
 
     .button-array {
