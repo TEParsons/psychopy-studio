@@ -32,15 +32,29 @@ export class Script {
             console.error("Script running is not available in browser.")
             return
         }
+        // mark started
+        await python.output.stdout.send(
+            `--- Started experiment ${this.file.name} ---`
+        )
         // run script
-        this.running = python.scripts.run(
+        this.running = await python.scripts.run(
             version,
-            this.file.file,  
+            this.file.file,
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
             await electron.paths.prefs()
         )
-        await this.running
+        // wait for it to finish
+        await python.scripts.wait(version, this.running)
+        // if stopped manually, stopPython will have already marked it stopped
+        if (this.running === undefined) {
+            return
+        }
+        // mark finished
+        this.running = undefined
+        await python.output.stdout.send(
+            `--- Finished experiment ${this.file.name} ---`
+        )
     }
 
     /**
@@ -58,10 +72,11 @@ export class Script {
             console.error("Script running is not available in browser.")
             return
         }
-        // request stop from electron
-        await python.scripts.stop(version, this.running)
         // mark finished
+        let id = this.running
         this.running = undefined
+        // request stop from electron
+        await python.scripts.stop(version, id)
         await python.output.stdout.send(
             `--- Stopped experiment ${this.file.name} ---`
         )

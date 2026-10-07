@@ -61,9 +61,10 @@ export const handlers = {
     scripts: {
         run: ipcMain.handle("python.scripts.run", async (evt, venv, file, ...args) => {
             let script = new PythonScript(await getVenv(venv), file, args);
-            return await script.run()
+            return script.start()
         }),
-        stop: ipcMain.handle("python.scripts.stop", async (evt, venv, id) => (await getVenv(venv)).scripts[id].stop())
+        wait: ipcMain.handle("python.scripts.wait", async (evt, venv, id) => (await getVenv(venv)).scripts[id]?.wait()),
+        stop: ipcMain.handle("python.scripts.stop", async (evt, venv, id) => (await getVenv(venv)).scripts[id]?.stop())
     },
     psychojs: {
         run: ipcMain.handle("python.psychojs.run", async (evt, cwd, params={}) => await PsychoJSServer.run(cwd, params)),
