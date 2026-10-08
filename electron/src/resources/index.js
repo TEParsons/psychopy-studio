@@ -10,3 +10,6 @@ if (process.platform === "win32") {
 } else {
   favicon += "@1024x1024.png"
 }
+
+// path to the splash screen page
+export var splash = path.join(import.meta.dirname, 'splash.html')

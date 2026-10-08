@@ -1,7 +1,7 @@
 import proc from "child_process";
 import { app } from "electron";
-import logging from "./logging.js";
-import { isDev } from "./version.js";
+import logging from "./tools/logging.js";
+import { isDev } from "./tools/version.js";
 import path from "node:path";
 
 // details about the Svelte instance

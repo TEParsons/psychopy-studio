@@ -1,9 +1,9 @@
 import proc from "child_process";
-import logging from "../logging.js";
+import logging from "../tools/logging.js";
 import { BrowserWindow } from "electron";
 import tcp from "tcp-port-used";
 import semver from "semver";
-import { appVersion } from "../version.js";
+import { appVersion } from "../tools/version.js";
 
 
 export const decoder = new TextDecoder();
