@@ -42,6 +42,19 @@
     </div>
 {/if}
 
+<svelte:window 
+    onkeyup={evt => {
+        // dismiss tooltip on Escape
+        if (shown && evt.key === "Escape") {
+            // prevent default behaviour
+            evt.preventDefault()
+            console.log(evt)
+            // dismiss
+            shown = false
+        }
+    }}
+/>
+
 <style>
     .tooltip {
         position: absolute;
