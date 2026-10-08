@@ -21,6 +21,7 @@ const { handlers: stateHandlers, lastState, newFrame, updateFrame, saveState } =
 const { windows, newWindow, setMenu } = require("./frames.js");
 const { details: svelte, startSvelte } = require("./svelte.js");
 const { prefs, prefsFile } = require("./tools/preferences.js");
+const { requestKeyboardAccess, hasKeyboardAccess } = require("./tools/system.js");
 const { default: test } = require('node:test');
 
 // get a single-instance lock
@@ -264,6 +265,10 @@ const handlers = {
     clipboard: {
       get: ipcMain.handle("electron.clipboard.get", (evt) => clipboard),
       set: ipcMain.handle("electron.clipboard.set", (evt, value) => clipboard = value)
+    },
+    system: {
+      requestKeyboardAccess: ipcMain.handle("electron.system.requestKeyboardAccess", async (evt) => await requestKeyboardAccess()),
+      hasKeyboardAccess: ipcMain.handle("electron.system.hasKeyboardAccess", async (evt) => await hasKeyboardAccess())
     },
     version: ipcMain.handle("electron.version", (evt) => appVersion),
     platform: ipcMain.handle("electron.platform", (evt) => process.platform),

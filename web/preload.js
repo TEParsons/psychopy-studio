@@ -43,7 +43,8 @@ export const electron = {
     scandir: (root) => {},
     showItemInFolder: (folder) => {},
     openPath: (path) => {},
-    openExternal: (url) => {}
+    openExternal: (url) => {},
+    downloadFolder: (url, target, name) => {}
   },
   clipboard: {
     get: () => {},
@@ -51,6 +52,10 @@ export const electron = {
   },
   state: {
     updateFrame: (details) => {}
+  },
+  system: {
+    requestKeyboardAccess: () => {},
+    hasKeyboardAccess: () => {}
   },
   version: () => {},
   platform: () => {},
@@ -73,7 +78,8 @@ export const python = {
     installPackage: (venv, name, version=undefined) => {},
     uninstallPackage: (venv, name) => {},
     getPackages: (venv) => {},
-    getPackageDetails: (venv, name) => {}
+    getPackageDetails: (venv, name) => {},
+    hasGIL: (venv) => {}
   },
   uv: {
     folder: () => {},
@@ -131,13 +137,17 @@ export const git = {
   listGroups: (username) => {},
   listSurveys: (username) => {},
   getUserInfo: (username) => {},
+  authenticateURL: (url, username) => {},
   getRemote: (folder, user) => {},
   getProjectInfo: (details, username) => {},
   clone: (details, username) => {},
+  fork: (details, username) => {},
+  listProjectForks: (project, username) => {},
   pull: (folder, user, force=true) => {},
   stage: (folder) => {},
   commit: (message, folder, user) => {},
   push: (folder, user, force=false) => {},
   newProject: (details, folder, user) => {},
   loadProjects: () => {},
+  linkProject: (key, folder) => {},
 }
