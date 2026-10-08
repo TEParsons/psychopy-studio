@@ -11,7 +11,7 @@
         /** @prop @type {string} Where to show the tooltip, relative to its parent */
         position = "right",
         /** @prop @type {number} Time (s) to wait after mouseout before hiding, so the mouse can move onto the tooltip */
-        grace = 0.150,
+        grace = 0.05,
         /** @interface */
         children
     } = $props()
