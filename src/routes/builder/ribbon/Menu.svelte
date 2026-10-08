@@ -6,9 +6,11 @@
     import { FindDialog } from "$lib/dialogs/find";
     import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { prefs } from "$lib/preferences.svelte"; 
-    import { electron, python } from "$lib/globals.svelte";
+    import { electron, python, git } from "$lib/globals.svelte";
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js";
     import { PluginManagerDlg, PsychoPyBranchDlg } from "$lib/dialogs/pluginManager";
+    import BrowseDemosDlg from "$lib/pavlovia/browseProjects/BrowseDemosDlg.svelte";
+    import { projectsLoaded, openProject } from "$lib/pavlovia/utils.svelte";
     import { setupPython } from "$lib/python";
     import semver from "semver";
     import { translate } from "$lib/translation";
@@ -54,7 +56,8 @@
         deviceMgrDlg: false,
         pluginMgr: false,
         psychopyBranchDlg: false,
-        bugReport: false
+        bugReport: false,
+        browseDemosDlg: false
     })
 </script>
 
@@ -297,6 +300,22 @@
         </SubMenu>
     {/if}
 
+    <SubMenu label={translate("Demos")}>
+        {#await projectsLoaded.promise then projects}
+            {#each Object.keys(projects).filter(project => project.startsWith("demos/")) as project}
+                <MenuItem 
+                    label={project.split("/").at(-1)}
+                    onclick={evt => openProject(projects[project])}
+                />
+            {/each}
+            <MenuSeparator />
+            <MenuItem 
+                label={translate("Browse demos...")}
+                onclick={evt => show.browseDemosDlg = true}
+            />
+        {/await}
+    </SubMenu>
+
     <SubMenu label={translate("Tools")} icon="/icons/btn-hamburger.svg">
         <MenuItem 
             label={translate("Open device manager")}
@@ -401,3 +420,6 @@
         bind:shown={show.bugReport}
     />
 {/if}
+<BrowseDemosDlg
+    bind:shown={show.browseDemosDlg}
+/>

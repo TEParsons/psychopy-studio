@@ -1,7 +1,12 @@
 <script>
-    import ProjectPanel from "./ProjectPanel.svelte";
+    import ProjectPanel from "../ProjectPanel.svelte";
     import { PanelButton } from "$lib/utils/buttons"
     import { translate } from "$lib/translation";
+
+    let {
+        selection=$bindable(),
+        searchTerm=$bindable()
+    } = $props()
 
     let requestDemos = fetch("https://pavlovia.org/api/v2/experiments?search=demos&designer=demos").then(
         resp => resp.json()
@@ -26,10 +31,6 @@
         }, {})
     )
 
-    let selectedDemo = $state.raw()
-
-    let searchTerm = $state.raw("")
-
     function searchDemos(demos) {
         // start with blank output
         let output = {}
@@ -38,7 +39,7 @@
             // filter for matching demos
             let matchingDemos = demos[categ].filter(
                 demo => {
-                    if (demo.name.includes(searchTerm)) {
+                    if (demo.name.includes(searchTerm || "")) {
                         return true
                     }
 
@@ -94,8 +95,8 @@
                             {#each filteredDemos[categ] as demo}
                                 <button 
                                     class=project-card
-                                    class:selected={selectedDemo === demo.pathWithNamespace}
-                                    onclick={evt => selectedDemo = demo.pathWithNamespace}
+                                    class:selected={selection === demo.pathWithNamespace}
+                                    onclick={evt => selection = demo.pathWithNamespace}
                                 >
                                     <h4>{demo.name.replaceAll("_", " ")}</h4>
                                     {demo.pathWithNamespace.replaceAll("/", " / ")}
@@ -108,9 +109,9 @@
         </div>
     </div>
     <div class=project-panel>
-        {#if selectedDemo}
+        {#if selection}
             <ProjectPanel 
-                bind:project={selectedDemo}
+                bind:project={selection}
             />
         {/if}
     </div>

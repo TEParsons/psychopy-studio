@@ -1,8 +1,9 @@
 <script>
     import { electron, git } from "$lib/globals.svelte";
-    import { Dialog, MessageDialog } from "$lib/utils/dialog";
+    import { MessageDialog } from "$lib/utils/dialog";
+    import { projectsLoaded, openProject, cloneProject, forkProject, downloadProject } from "./utils.svelte"
     import { Button } from "$lib/utils/buttons";
-    import { parsePath, browseFileOpen } from "$lib/utils/files";
+    import { parsePath } from "$lib/utils/files";
     import { openIn } from "$lib/utils/views.svelte";
     import { getContext } from "svelte";
     import { marked } from "marked";
@@ -22,106 +23,6 @@
     let busy = $state({
         cloning: Promise.resolve(false)
     })
-
-    let projectsLoaded = $state.raw(
-        git.loadProjects()
-    )
-
-    async function fileOpen(folder) {
-        // browse files
-        let file = await browseFileOpen([
-            { description: translate("PsychoPy Experiments"), accept: {"application/xml": [".psyexp"]} },
-            { description: translate("Python Scripts"), accept: {"text/x-python-code": [".py"]} },
-            { description: translate("JavaScript Scripts"), accept: {"text/javascript": [".js"]} }
-        ], folder)
-        // abort if cancelled
-        if (!file) {
-            return
-        }
-        // open in appropriate view
-        if (file.ext === ".psyexp") {
-            openIn(file.file, "builder")
-        } else {
-            openIn(file.file, "coder")
-        }
-    }
-
-    /**
-     * Clone a a given remote project to this machine
-     */
-    async function clone(targetProject=project) {
-        // prompt user to choose folder
-        let folder = await electron.files.openDialog({
-            title: translate("Choose folder for Pavlovia project"),
-            buttonLabel: translate("Clone"),
-            properties: ["openDirectory"],
-        })
-        // abort if cancelled
-        if (!folder) {
-            return
-        }
-        // clone
-        await git.clone(
-            {
-                group: targetProject.split("/")[0],
-                name: targetProject.split("/")[1],
-                folder: path.join(folder[0], targetProject.split("/")[1])
-            }, 
-            $state.snapshot(current.user)
-        )
-        // reload projects
-        projectsLoaded = git.loadProjects()
-    }
-
-    /**
-     * Fork and clone the remote project to this machine
-     */
-    async function fork() {
-        // create fork
-        let newProject = await git.fork(
-            {
-                groupFrom: project.split("/")[0],
-                groupTo: $state.snapshot(current.user),
-                name: project.split("/")[1]
-            },
-            $state.snapshot(current.user)
-        )
-        // clone new project
-        return await clone(newProject)
-    }
-
-    /**
-     * Download files from remote project, detached (not cloned)
-     */
-    async function download(targetProject=project) {
-        // prompt user to choose folder
-        let folder = await electron.files.openDialog({
-            title: translate("Choose folder for downloaded project"),
-            buttonLabel: translate("Download"),
-            properties: ["openDirectory"],
-        })
-        // abort if cancelled
-        if (!folder) {
-            return
-        }
-        // create authenticated url
-        let url = await git.authenticateURL(
-            `https://gitlab.pavlovia.org/api/v4/projects/${encodeURIComponent(targetProject)}/repository/archive.zip`,
-            $state.snapshot(current.user)
-        )
-        // create filename
-        let filename = targetProject.split("/").at(-1)
-        // download folder
-        await electron.files.downloadFolder(
-            url,
-            folder[0],
-            filename
-        )
-        // add to projects.json
-        await git.linkProject(targetProject, path.join(folder[0], filename))
-        // reload projects
-        projectsLoaded = git.loadProjects()
-    }
 </script>
 
 
@@ -136,7 +37,9 @@
             onclick={async evt => {
                 if (current.user === info.namespace.name) {
                     // if this is their own project, clone it
-                    return await clone()
+                    return await cloneProject(
+                        $state.snapshot(current.user)
+                    )
                 } else {
                     // if not, ask if they want to fork it
                     show.forkPrompt = true
@@ -148,8 +51,14 @@
         <MessageDialog
             title={translate("Fork project?")}
             buttons={{
-                YES: evt => fork(),
-                NO: evt => clone(project)
+                YES: evt => forkProject(
+                    project,
+                    $state.snapshot(current.user)
+                ),
+                NO: evt => cloneProject(
+                    project, 
+                    $state.snapshot(current.user)
+                )
             }}
             bind:shown={show.forkPrompt}
         >
@@ -162,7 +71,7 @@
             tooltip={translate("Point to a local clone of this project")}
             icon="/icons/btn-open.svg"
             onclick={async evt => {
-                fileOpen()
+                openProject()
             }}
             bind:awaiting={busy.cloning}
             horizontal
@@ -179,7 +88,7 @@
         <Button 
             label={translate("Open file")}
             icon="/icons/btn-open.svg"
-            onclick={evt => fileOpen(folder)}
+            onclick={evt => openProject(folder)}
             horizontal
         />
         {#await electron.files.scandir(folder, true) then files}
@@ -208,7 +117,7 @@
         <Button 
             label={translate("Download files")}
             icon="/icons/btn-download.svg"
-            onclick={evt => download(name)}
+            onclick={evt => downloadProject(name, $state.snapshot(current.user))}
             horizontal
         />
         <Button 
@@ -254,7 +163,7 @@
 
             {@html marked(info.description || "")}
         
-            {#await projectsLoaded}
+            {#await projectsLoaded.promise}
                 {translate("Checking whether {} is synced...").replace("{}", project)}
             {:then projects}
                 <h3>{translate("Local files")}</h3>

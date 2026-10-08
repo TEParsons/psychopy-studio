@@ -1,12 +1,13 @@
 <script>
     import { Dialog } from "$lib/utils/dialog";
-    import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import BrowseDemos from "./BrowseDemos.svelte";
     import { translate } from "$lib/translation"
 
     let {
         shown=$bindable(),
-        awaiting=$bindable()
+        awaiting=$bindable(),
+        selection=$bindable(),
+        searchTerm=$bindable()
     } = $props()
 
 </script>
@@ -19,5 +20,8 @@
     bind:shown={shown}
     bind:awaiting={awaiting}
 >
-    <BrowseDemos />
+    <BrowseDemos 
+        bind:selection={selection}
+        bind:searchTerm={searchTerm}
+    />
 </Dialog>
