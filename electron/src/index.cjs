@@ -11,16 +11,16 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
 }
 
 const { handlers: pythonHandlers } = require("./python");
-const { handlers: gitHandlers } = require("./git.js");
+const { handlers: gitHandlers } = require("./tools/git.js");
 const { handlers: filesHandlers } = require("./files.js");
-const logging = require("./logging.js");
-const { UsageReport } = require("./usage.js");
-const { favicon } = require("./resources.js");
-const { appVersion, isDev } = require('./version.js');
-const { handlers: stateHandlers, lastState, newFrame, updateFrame, saveState } = require('./state.js');
+const logging = require("./tools/logging.js");
+const { UsageReport } = require("./tools/usage.js");
+const { favicon, splash } = require("./resources/index.js");
+const { appVersion, isDev } = require('./tools/version.js');
+const { handlers: stateHandlers, lastState, newFrame, updateFrame, saveState } = require('./tools/state.js');
 const { windows, newWindow, setMenu } = require("./frames.js");
 const { details: svelte, startSvelte } = require("./svelte.js");
-const { prefs, prefsFile } = require("./preferences.js");
+const { prefs, prefsFile } = require("./tools/preferences.js");
 const { default: test } = require('node:test');
 
 // get a single-instance lock
@@ -99,7 +99,7 @@ const createWindow = () => {
     frame: false,
     alwaysOnTop: true
   });
-  windows.splash.loadFile(path.join(__dirname, 'splash.html'));
+  windows.splash.loadFile(splash);
   windows.splash.center();
   if (prefs.params?.showSplash?.val !== "False") {
     // only show if requested via prefs

@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import { execSync, execTracked, output, resolvePackageVersion } from "./utils.js";
 import { downloadFolder } from "../files.js";
-import { appVersion } from "../version.js";
+import { appVersion } from "../tools/version.js";
 
 
 export class UV {

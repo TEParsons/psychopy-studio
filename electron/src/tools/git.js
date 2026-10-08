@@ -5,8 +5,8 @@ import http from "isomorphic-git/http/node";
 import fs from "node:fs";
 import path from "node:path";
 import { BrowserWindow } from "electron";
-import { randint, randof } from "./tools/random.js";
-import { favicon } from "./resources.js";
+import { randint, randof } from "./random.js";
+import { favicon } from "../resources/index.js";
 
 
 // set server URL and client ID

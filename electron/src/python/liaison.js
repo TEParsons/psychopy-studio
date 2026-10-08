@@ -1,6 +1,6 @@
 import { app } from 'electron';
 import { getVenv } from "./venv.js";
-import logging from "../logging.js";
+import logging from "../tools/logging.js";
 import { output, decoder, getSafeAddress } from "./utils.js";
 import path from "path";
 

@@ -1,6 +1,6 @@
 import { getVenv } from "./venv.js";
-import { favicon } from "../resources.js";
-import logging from "../logging.js";
+import { favicon } from "../resources/index.js";
+import logging from "../tools/logging.js";
 import { getSafeAddress } from "./utils.js";
 import { BrowserWindow, Menu } from "electron";
 import path from "node:path";
