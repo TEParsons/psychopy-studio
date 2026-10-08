@@ -405,6 +405,47 @@ export function clearProjects() {
 
 
 /**
+ * Store a reference to a project's local folder in the known projects list
+ *
+ * @param {string} key Key of the project, in the format `group/name`
+ * @param {string} folder Local folder the project is in
+ */
+export function linkProject(key, folder) {
+    // load projects
+    loadProjects()
+    // store reference in known projects list
+    projects[key] = folder
+    // save projects
+    saveProjects()
+}
+
+
+/**
+ * Add a user's access token to a URL, so it can be used to make authenticated requests to Pavlovia
+ * 
+ * @param {string|URL} url URL to authenticate (if given as a URL object, it will be modified in place)
+ * @param {string} username Username to authenticate as, if not given (or not logged in) URL is left unchanged
+ * 
+ * @returns {URL} The authenticated URL
+ */
+export async function authenticateURL(url, username) {
+    // make sure we have a URL object
+    if (!(url instanceof URL)) {
+        url = new URL(url)
+    }
+    // apply auth
+    if (username && username in users) {
+        url.searchParams.set(
+            "access_token", 
+            await users[username].getToken()
+        )
+    }
+
+    return url
+}
+
+
+/**
  * Get the details of a specific group
  * 
  * @param {string} group Group to get details for
@@ -416,12 +457,7 @@ export async function getGroup(group, username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups/${group}`)
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // get groups
     let resp = await fetch(
         url.toString()
@@ -437,12 +473,7 @@ export async function listGroups(username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups`)
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // get groups
     return await fetch(
         url.toString()
@@ -474,6 +505,26 @@ export async function listSurveys(username) {
 }
 
 
+/**
+ * List forks of a given project
+ * 
+ * @param {string} project Project to list forks for (namespace/name) 
+ * @param {string} username Use to authenticate as 
+ */
+export async function listProjectForks(project, username) {
+    // create URL
+    let url = new URL(`${server}/api/v4/projects/${encodeURIComponent(`${project}`)}/forks`)
+    // apply auth
+    await authenticateURL(url, username)
+    // get forks
+    return await fetch(
+        url.toString()
+    ).then(
+        resp => resp.json()
+    )
+}
+
+
 export async function newProject(details, folder, username) {
     // initialise local repo
     await git.init({ 
@@ -490,8 +541,7 @@ export async function newProject(details, folder, username) {
     // setup gitignore
     setupGitIgnore(folder)
     // store reference
-    projects[`${details.group}/${details.name}`] = folder
-    saveProjects()
+    linkProject(`${details.group}/${details.name}`, folder)
     // stage and commit all local files
     await stage(folder)
     await commit("Create project", folder, username)
@@ -574,12 +624,10 @@ export async function getRemote(folder, username=undefined) {
         return null
     }
     // store reference in known projects list
-    loadProjects()
     let key = remote.match(`${RegExp.escape(server)}\/(.*?).git$`)?.[1]
     if (key) {
-        projects[key] = folder
+        linkProject(key, folder)
     }
-    saveProjects()
     // parse to a URL
     let url = new URL(remote)
     // apply auth
@@ -625,19 +673,19 @@ export async function getProjectInfo({
     // create search url
     let url = new URL(`https://gitlab.pavlovia.org/api/v4/${isGroup ? "groups" : "users"}/${group}/projects?search=${name}`)    
     // apply auth
-    if (username && username in users) {
-        url.searchParams.set(
-            "access_token", 
-            await users[username].getToken()
-        )
-    }
+    await authenticateURL(url, username)
     // search for project
     return await fetch(
         url.toString()
     ).then(
         resp => resp.json()
     ).then(
-        resp => resp?.[0]
+        resp => {
+            if (resp.message && resp.message.startsWith("404")) {
+                throw Error(resp.message)
+            }
+            return resp?.[0]
+        }
     )
 }
 
@@ -659,13 +707,105 @@ export async function clone({
         url: `${server}/${group}/${name}.git`,
         onAuth: evt => { 
             return { username: "oauth2", password: token } 
-        }
+        },
+        onMessage: output
     })
     // store reference in known projects list
-    projects[`${group}/${name}`] = folder
-    saveProjects()
+    linkProject(`${group}/${name}`, folder)
     // log
     output(`Finished cloning repo.`)
+}
+
+
+export async function fork({
+    groupFrom: groupFrom,
+    groupTo: groupTo,
+    name: name
+}, username) {
+    // log
+    output(`Creating fork of repo ${groupFrom}/${name} on ${groupTo}...`)
+    // get auth token
+    let token = await users[username].getToken()
+    // construct url to check whether fork exists
+    let statusUrl = new URL(`${server}/api/v4/projects/${encodeURIComponent(`${groupTo}/${name}`)}`)
+    statusUrl.searchParams.set("access_token", token)
+    // handle if fork name already exists
+    let exists = await fetch(
+        statusUrl.toString()
+    ).then(
+        resp => resp.json()
+    ).then(
+        // 404 error doesn't have an id, just message
+        data => {
+            return data?.id
+        }
+    )
+    if (exists) {
+        // log skipped
+        output(`Repo ${groupTo}/${name} already exists.`)
+        return `${groupTo}/${name}`
+    }
+    // create URL (project id can be a URL-encoded path)
+    let url = new URL(`${server}/api/v4/projects/${encodeURIComponent(`${groupFrom}/${name}`)}/fork`)
+    url.searchParams.set("access_token", token)
+    // request fork
+    let resp = await fetch(url.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            namespace_path: `${groupTo}`,
+            path: `${name}`
+        })
+    }).then(
+        resp => resp.json()
+    )
+    // detect failure
+    if (!resp.id) {
+        throw new Error(JSON.stringify(resp.message || resp.error) || "Fork failed")
+    }
+    // forking happens in the background, so wait for it to finish before returning
+    await new Promise((resolve, reject) => {
+        let busy = false;
+        // periodically check for completion
+        let check = setInterval(async () => {
+            try {
+                // abort if busy
+                if (busy) {
+                    return
+                }
+                busy = true
+                // make query
+                let status = await fetch(
+                    statusUrl.toString()
+                ).then(
+                    resp => resp.json()
+                ).then(
+                    // is it complete?
+                    resp => resp.import_status
+                )
+                // if success, resolve and stop checking
+                if (!status || ["finished", "none"].includes(status)) {
+                    resolve(status)
+                    clearInterval(check)
+                }
+                // if fail, reject and stop checking
+                if (status === "failed") {
+                    reject(status)
+                    clearInterval(check)
+                }
+                // mark done
+                busy = false
+            } catch (err) {
+                // stop checking if anything goes wrong
+                clearInterval(check)
+                reject(err)
+            }
+        }, 1000)
+    })
+    // log
+    output(`Finished forking ${groupFrom}/${name} on ${groupTo}.`)
+
+    return `${groupTo}/${name}`
 }
 
 
@@ -814,13 +954,17 @@ export const handlers = {
     listGroups: ipcMain.handle("git.listGroups", (evt, username) => listGroups(username)),
     listSurveys: ipcMain.handle("git.listSurveys", (evt, username) => listSurveys(username)),
     getUserInfo: ipcMain.handle("git.getUserInfo", (evt, username) => users[username]?.profile),
+    authenticateURL: ipcMain.handle("git.authenticateURL", async (evt, url, username) => (await authenticateURL(url, username)).toString()),
     getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => getRemote(folder, user)),
     getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, details, username) => getProjectInfo(details, username)),
     clone: ipcMain.handle("git.clone", (evt, details, username) => clone(details, username)),
+    fork: ipcMain.handle("git.fork", (evt, details, username) => fork(details, username)),
+    listProjectForks: ipcMain.handle("git.listProjectForks", (evt, project, username) => listProjectForks(project, username)),
     pull: ipcMain.handle("git.pull", (evt, folder, user, force=true) => pull(folder, user, force)),
     stage: ipcMain.handle("git.stage", (evt, folder) => stage(folder)),
     commit: ipcMain.handle("git.commit", (evt, message, folder, user) => commit(message, folder, user)),
     push: ipcMain.handle("git.push", (evt, folder, user, force=false) => push(folder, user, force)),
     newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => newProject(details, folder, user)),
-    loadProjects: ipcMain.handle("git.loadProjects", (evt) => loadProjects())
+    loadProjects: ipcMain.handle("git.loadProjects", (evt) => loadProjects()),
+    linkProject: ipcMain.handle("git.linkProject", (evt, key, folder) => linkProject(key, folder))
 }
