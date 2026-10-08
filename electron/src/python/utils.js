@@ -1,5 +1,5 @@
 import proc from "child_process";
-import logging from "../logging.js";
+import logging from "../tools/logging.js";
 import { BrowserWindow } from "electron";
 import tcp from "tcp-port-used";
 import { extract as unzip } from "@electron-internal/extract-zip";
@@ -7,7 +7,7 @@ import { extract as untar } from "tar";
 import fs from "fs";
 import path from "path";
 import semver from "semver";
-import { appVersion } from "../version.js";
+import { appVersion } from "../tools/version.js";
 
 
 export const decoder = new TextDecoder();

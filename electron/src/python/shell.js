@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { decoder } from "./utils.js";
-import logging from "../logging.js";
+import logging from "../tools/logging.js";
 import proc from "child_process";
 
 

@@ -3,7 +3,7 @@ import { platform , arch } from "process";
 import path from "path";
 import fs from "fs";
 import { execSync, execTracked, output, downloadFolder, resolvePackageVersion } from "./utils.js";
-import { appVersion } from "../version.js";
+import { appVersion } from "../tools/version.js";
 
 
 export class UV {

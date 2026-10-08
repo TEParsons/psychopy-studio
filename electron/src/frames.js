@@ -2,11 +2,11 @@ import path from "node:path";
 import fs from "fs";
 import proc from "child_process";
 import { BrowserWindow, Menu, shell } from "electron";
-import logging from "./logging.js";
-import { favicon } from "./resources.js";
+import logging from "./tools/logging.js";
+import { favicon } from "./resources/index.js";
 import { details as svelte } from "./svelte.js";
-import { prefs } from "./preferences.js";
-import state from "./state.js";
+import { prefs } from "./tools/preferences.js";
+import state from "./tools/state.js";
 
 
 // store window objects against their ID

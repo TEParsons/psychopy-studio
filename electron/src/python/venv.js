@@ -1,8 +1,8 @@
 import { uv } from "./uv.js";
 import { execSync, output, downloadFolder, resolvePackageVersion } from "./utils.js";
-import { appVersion } from "../version.js";
+import { appVersion } from "../tools/version.js";
 import semver from "semver";
-import logging from "../logging.js";
+import logging from "../tools/logging.js";
 import proc from "child_process";
 import process from "process";
 import path from "path";
