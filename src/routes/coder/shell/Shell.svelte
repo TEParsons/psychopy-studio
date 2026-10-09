@@ -78,15 +78,17 @@
 
 <style>
     .shell-ctrl {
+        display: grid;
+        position: relative;
         height: 100%;
-        display: flex;
-        flex-direction: column;
+        width: 100%;
+        grid-template-rows: 1fr min-content;
         justify-content: stretch;
         gap: .5rem;
     }
 
     .output {
-        flex-grow: 1;
         padding: .5rem;
+        box-sizing: border-box;
     }
 </style>
