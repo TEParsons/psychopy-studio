@@ -50,13 +50,12 @@
 </div>
 
 <style>
-    /* --- Frame ribbon ---*/
-
     #ribbon {
         display: flex;
         flex-direction: row;
         padding: .5em;
         background-color: var(--crust);
         position: relative;
+        overflow-x: auto;
     }    
 </style>
