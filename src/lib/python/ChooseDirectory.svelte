@@ -27,7 +27,7 @@
                 class:selected={selected === "user"}
                 onclick={(evt) => selected = "user"}
             >
-                <h4>User folder (recommended for labs)</h4>
+                <h4>User folder (recommended for most users)</h4>
 
                 <ul class=procon>
                     <li class=pro>Each user on this computer gets control of their own PsychoPy version and plugins</li>
