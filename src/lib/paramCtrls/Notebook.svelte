@@ -4,6 +4,7 @@
     import { Notebook, NotebookPage } from "$lib/utils/notebook"
     import { python } from "$lib/globals.svelte";
     import { translate } from "$lib/translation";
+    import TranslatedCodeCtrl from "./TranslatedCodeCtrl.svelte";
 
     let {
         element=$bindable(),
@@ -12,11 +13,6 @@
     } = $props();
 
     let pageIndex = $state()
-
-    // horizontal layout for CodeComponent
-    let horizontal = $derived(
-        element.tag === "CodeComponent"
-    )
 
     // define order of categories (any not in here are 0)
     let categOrder = {
@@ -134,11 +130,7 @@
                             (value) => {pageIndex = categ}
                         }
                     >
-                        <div 
-                            class=params-panel
-                            style:flex-direction={horizontal ? "row" : "column"}
-                            style:min-width={horizontal ? "65rem" : "45rem"}
-                        >
+                        <div class=params-panel>
                             <!-- start ctrl, if needed -->
                             {#if "startVal" in params}
                                 <StartStopCtrl
@@ -157,11 +149,27 @@
                             {/if}
                             <!-- other params -->
                             {#each Object.entries(params) as [name, param]}
-                                {#if !["startVal", "startType", "startEstim", "stopVal", "stopType", "durationEstim", ...hideParams].includes(name)}
+                                <!-- translatable code params need to be in a pane sizer -->
+                                {#if name in translatableParams}
+                                    <TranslatedCodeCtrl
+                                        bind:codeTypeParam={element.params["Code Type"]}
+                                        bind:pyParam={element.params[name]}
+                                        bind:jsParam={element.params[translatableParams[name]]}
+                                    />
+                                {:else if ![
+                                    "startVal", 
+                                    "startType", 
+                                    "startEstim", 
+                                    "stopVal", 
+                                    "stopType", 
+                                    "durationEstim", 
+                                    ...Object.values(translatableParams), 
+                                    ...hideParams
+                                ].includes(name)}
                                     <ParamCtrl 
                                         name={name} 
                                         bind:param={element.params[name]}
-                                    ></ParamCtrl>
+                                    />
                                 {/if}
                             {/each}
                         </div>
@@ -175,6 +183,7 @@
 <style>
     .params-panel {
         display: flex;
+        flex-direction: column;
         align-items: stretch;
         justify-content: stretch;
         gap: 1rem;
@@ -184,6 +193,7 @@
         height: 100%;
         width: 100%;
         min-height: 10rem;
+        min-width: 45rem;
     }
     .uncategorised-params-panel {
         display: grid;
