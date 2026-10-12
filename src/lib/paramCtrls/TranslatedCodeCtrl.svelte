@@ -1,6 +1,8 @@
 <script>
     import ParamCtrl from "./ParamCtrl.svelte";
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
+    import { python } from "$lib/globals.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         codeTypeParam=$bindable(),
@@ -11,8 +13,39 @@
 
     // highlight category if we have content
     $effect(() => highlight = [pyParam.val, jsParam.val].some(
-        val => !["", "// Translating..."].includes(val)
+        val => val !== ""
     ))
+
+    // translate to JS if code type indicates as such
+    $effect(() => {
+        // skip if not autotranslating
+        if (codeTypeParam.val !== "Auto->JS") {
+            return
+        }
+        // skip if python isn't ready yet
+        if (!python?.ready) {
+            return
+        }
+        // start off just saying "Translating..."
+        jsParam.val = `// ${translate("Translating...")}`
+        // do translation in Python
+        python.liaison.send("app", {
+            command: "try",
+            args: [
+                "psychopy.experiment.py2js_transpiler:translatePythonToJavaScript", 
+                pyParam.val.trim(), 
+                null
+            ]
+        }, 10000).then(resp => {
+            if (resp.success) {
+                jsParam.val = resp.result
+            } else {
+                jsParam.val = `// ${translate("Error in Python code")}`
+            }
+        }).catch(
+            err => jsParam.val = `// ${translate("Error in Python code")}`
+        )
+    })
 </script>
 
 

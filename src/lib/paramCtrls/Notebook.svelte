@@ -2,8 +2,6 @@
     import ParamCtrl from "./ParamCtrl.svelte";
     import StartStopCtrl from "./StartStopCtrl.svelte";
     import { Notebook, NotebookPage } from "$lib/utils/notebook"
-    import { python } from "$lib/globals.svelte";
-    import { translate } from "$lib/translation";
     import TranslatedCodeCtrl from "./TranslatedCodeCtrl.svelte";
 
     let {
@@ -30,7 +28,7 @@
     }
 
     // params whose content can be translated 
-    // (in the format format { param name: JS param name })
+    // (in the format { param name: JS param name })
     let translatableParams = {
         "Before Experiment": "Before JS Experiment", 
         "Begin Experiment": "Begin JS Experiment", 
@@ -41,37 +39,6 @@
     }
     // keep track of which categories should be highlighted (for Code Component)
     let highlightCategs = $state({})
-
-    // store translated param values
-    $effect(() => {
-        let output = {}
-        // if there's a Code Type param and it's set to auto translate, JS params should be derived
-        if (element.params?.["Code Type"]?.val === "Auto->JS") {
-            for (let [key, jskey] of Object.entries(translatableParams)) {
-                if (element.params[jskey]) {
-                    if (python?.ready) {
-                        // start off just saying "Translating..."
-                        element.params[jskey].val = "// Translating..."
-                        // do translation in Python
-                        python.liaison.send("app", {
-                            command: "try",
-                            args: ["psychopy.experiment.py2js_transpiler:translatePythonToJavaScript", element.params[key].val.trim(), null]
-                        }, 10000).then(resp => {
-                            if (resp.success) {
-                                element.params[jskey].val = resp.result
-                            } else {
-                                element.params[jskey].val = `// ${translate("Error in Python code")}`
-                            }
-                        }).catch(
-                            err => element.params[jskey].val = `// ${translate("Error in Python code")}`
-                        )
-                    }
-                }
-            }
-        }
-
-        return output
-    })
 </script>
 
 <div class=params-container>
