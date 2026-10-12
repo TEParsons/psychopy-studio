@@ -37,13 +37,11 @@
         if (siblings.selected === undefined) {
             return
         }
-        // show self if no page is shown
-        if (siblings.selected.index === undefined) {
-            selected = true;
-            siblings.selected.index = handle;
-        }
         // update parent on selection
         if (selected) {
+            if (siblings.selected.index !== handle) {
+                siblings.selected.index = handle;
+            }
             siblings.selected.data = data;
             siblings.selected.page = children;
         }
@@ -51,12 +49,16 @@
     
     // register self with notebook on mount
     onMount(() => {
-        siblings.all.push(handle)
+        siblings.all.push({
+            handle: handle,
+            select: () => selected = true
+        })
     })
-    // unregister on destroy
+    // unregister on destroy (finding by handle, as the entry itself gets proxied by the notebook's state)
     onDestroy(() => {
-        if (siblings.all[siblings.all.indexOf(handle)] !== undefined) {
-            delete siblings.all[siblings.all.indexOf(handle)]
+        let index = siblings.all.findIndex(page => page?.handle === handle)
+        if (index >= 0) {
+            delete siblings.all[index]
         }
     })
 

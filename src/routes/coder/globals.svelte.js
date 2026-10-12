@@ -16,6 +16,7 @@ export let current = $state({
     ],
     tab: 0,
     shelltab: "stdout",
+    navigationtab: "outline",
     directory: undefined,
     openFile: async file => {
         if (typeof file === "string") {
