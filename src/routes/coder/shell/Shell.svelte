@@ -82,7 +82,7 @@
         position: relative;
         height: 100%;
         width: 100%;
-        grid-template-rows: 1fr min-content;
+        grid-template-rows: minmax(0, 1fr) min-content;
         justify-content: stretch;
         gap: .5rem;
     }
@@ -90,5 +90,7 @@
     .output {
         padding: .5rem;
         box-sizing: border-box;
+        min-height: 0;
+        min-width: 0;
     }
 </style>

@@ -41,7 +41,6 @@
         align-items: stretch;
         gap: .5rem;
         height: 100%;
-        min-width: 55rem;
     }
     .ctrls {
         display: flex;

@@ -30,6 +30,7 @@
     .output-container {
         overflow-y: auto;
         height: 20rem;
+        min-width: 55rem;
         background-color: var(--base);
         border: 1px solid var(--overlay);
         border-radius: .5rem;
