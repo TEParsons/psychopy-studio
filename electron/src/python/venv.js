@@ -352,11 +352,13 @@ export class PythonVenv {
      * Spawn a Python process
      * 
      * @param {array<string>} args Arguments to pass on spawn
+     * @param {object} callbacks Functions to call on stdout/stderr (`onstdout` and `onstderr`)
+     * @param {string} tag Subchannel to send output over (e.g. "app" sends to `stdout:app`/`stderr:app` as well as `stdout`/`stderr`), leave undefined to only send to `stdout`/`stderr`
      */
     spawn(args, callbacks={
         onstdout: evt => {}, 
         onstderr: evt => {}
-    }) {
+    }, tag=undefined) {
         // set initial onstdout and onstderr callbacks
         this.onstdout = callbacks.onstdout || (evt => {})
         this.onstderr = callbacks.onstderr || (evt => {})
@@ -365,14 +367,14 @@ export class PythonVenv {
         // add listener for stdout
         process.stdout.on(
             "data", evt => {
-                output("stdout", evt)
+                output(tag ? `stdout:${tag}` : "stdout", evt)
                 this.onstdout(evt)
             }
         )
         // add listener for errors
         process.stderr.on(
             "data", evt => {
-                output("stderr", evt)
+                output(tag ? `stderr:${tag}` : "stderr", evt)
                 this.onstderr(evt)
             }
         )

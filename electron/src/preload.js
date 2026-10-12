@@ -103,6 +103,11 @@ const python = {
     stderr: {
       send: (message) => ipcRenderer.send("stderr", message),
       listen: (lsnr) => ipcRenderer.on("stderr", lsnr)
+    },
+    app: {
+      stderr: {
+        listen: (lsnr) => ipcRenderer.on("stderr:app", lsnr)
+      }
     }
   },
   shell: {
