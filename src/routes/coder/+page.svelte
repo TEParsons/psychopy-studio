@@ -50,8 +50,6 @@
         })
     }
 
-    $inspect(current.navigationtab)
-
 </script>
 
 <title>{translate("PsychoPy Coder")}</title>
