@@ -52,7 +52,7 @@
                     <ParamCtrl 
                         name={name} 
                         param={param}
-                    ></ParamCtrl>
+                    />
                 {/if}
             {/each}
         {/if}
@@ -94,15 +94,15 @@
                             {/if}
                             <!-- other params -->
                             {#each Object.entries(params) as [name, param]}
-                                <!-- translatable code params need to be in a pane sizer -->
                                 {#if name in translatableParams}
+                                    <!-- translatable code params need to be in a pane sizer -->
                                     <TranslatedCodeCtrl
                                         bind:codeTypeParam={element.params["Code Type"]}
                                         bind:pyParam={element.params[name]}
                                         bind:jsParam={element.params[translatableParams[name]]}
                                         bind:highlight={highlightCategs[categ]}
                                     />
-                                {:else if ![
+                                {:else if [
                                     "startVal", 
                                     "startType", 
                                     "startEstim", 
@@ -112,6 +112,9 @@
                                     ...Object.values(translatableParams), 
                                     ...hideParams
                                 ].includes(name)}
+                                    <!-- start/stop params and JS params are already covered, so skip them along with any always hidden -->
+                                {:else}
+                                    <!-- other params rendered as normal -->
                                     <ParamCtrl 
                                         name={name} 
                                         bind:param={element.params[name]}
