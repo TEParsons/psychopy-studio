@@ -149,7 +149,13 @@
   "setdefault",
   "update",
   "values",
-  "self"
+  "self",
+  "this",
+  "switch",
+  "true",
+  "false",
+  "function",
+  "catch"
  ],
  "numpy": [
   "sin",
