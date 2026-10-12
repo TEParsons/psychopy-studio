@@ -21,8 +21,8 @@
             })
         }
     }
-    // listen to Python stderr
-    python.output.stderr.listen(listener)
+    // listen to stderr from the app's own Python processes (not scripts/experiments)
+    python.output.app.stderr.listen(listener)
     // listen for Liaison too
     python.liaison.listen("error", listener)
 </script>

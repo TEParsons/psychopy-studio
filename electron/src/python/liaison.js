@@ -50,7 +50,9 @@ export class Liaison {
                             resolve(evt)
                         }
                     }
-                }
+                },
+                // tag output as coming from the app (rather than a script)
+                "app"
             )
             // timeout after 1s
             setTimeout(reject, 10000)
