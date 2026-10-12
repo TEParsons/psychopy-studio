@@ -275,7 +275,12 @@ export async function loadUsers() {
         content = fs.readFileSync(file, { encoding: 'utf8' })
     }
     // parse as JSON
-    let data = JSON.parse(content)
+    let data 
+    try {
+        data = JSON.parse(content)
+    } catch {
+        data = {}
+    }
     // create a User object for each entry
     for (let [username, { token, profile }] of Object.entries(data)) {
         try {
