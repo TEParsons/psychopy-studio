@@ -2,8 +2,7 @@
     import ParamCtrl from "./ParamCtrl.svelte";
     import StartStopCtrl from "./StartStopCtrl.svelte";
     import { Notebook, NotebookPage } from "$lib/utils/notebook"
-    import { python } from "$lib/globals.svelte";
-    import { translate } from "$lib/translation";
+    import TranslatedCodeCtrl from "./TranslatedCodeCtrl.svelte";
 
     let {
         element=$bindable(),
@@ -12,11 +11,6 @@
     } = $props();
 
     let pageIndex = $state()
-
-    // horizontal layout for CodeComponent
-    let horizontal = $derived(
-        element.tag === "CodeComponent"
-    )
 
     // define order of categories (any not in here are 0)
     let categOrder = {
@@ -34,7 +28,7 @@
     }
 
     // params whose content can be translated 
-    // (in the format format { param name: JS param name })
+    // (in the format { param name: JS param name })
     let translatableParams = {
         "Before Experiment": "Before JS Experiment", 
         "Begin Experiment": "Begin JS Experiment", 
@@ -43,61 +37,8 @@
         "End Routine": "End JS Routine", 
         "End Experiment": "End JS Experiment"
     }
-    // categs which should be highlighted if any param has content
-    // (in the format { param name: param value => is highlighted })
-    let highlightableCategs = {
-        "Before Exp.": val => !(["", "// Translating..."].includes(val)),
-        "Begin Exp.": val => !(["", "// Translating..."].includes(val)), 
-        "Begin Routine": val => !(["", "// Translating..."].includes(val)), 
-        "Each Frame": val => !(["", "// Translating..."].includes(val)), 
-        "End Routine": val => !(["", "// Translating..."].includes(val)), 
-        "End Exp.": val => !(["", "// Translating..."].includes(val))
-    }
-    // whether highlightable categs are highlighted
-    let highlightCategs = $derived.by(() => {
-        // assume not
-        let highlights = {}
-        // iterate through categs
-        for (let [categ, params] of Object.entries(element.sortedParams)) {
-            // highlight if we have a content check method and it returns true on any param
-            highlights[categ] = Object.values(params).some(
-                param => highlightableCategs[categ]?.(param.val)
-            )
-        }
-
-        return highlights
-    })
-
-    // store translated param values
-    $effect(() => {
-        let output = {}
-        // if there's a Code Type param and it's set to auto translate, JS params should be derived
-        if (element.params?.["Code Type"]?.val === "Auto->JS") {
-            for (let [key, jskey] of Object.entries(translatableParams)) {
-                if (element.params[jskey]) {
-                    if (python?.ready) {
-                        // start off just saying "Translating..."
-                        element.params[jskey].val = "// Translating..."
-                        // do translation in Python
-                        python.liaison.send("app", {
-                            command: "try",
-                            args: ["psychopy.experiment.py2js_transpiler:translatePythonToJavaScript", element.params[key].val.trim(), null]
-                        }, 10000).then(resp => {
-                            if (resp.success) {
-                                element.params[jskey].val = resp.result
-                            } else {
-                                element.params[jskey].val = `// ${translate("Error in Python code")}`
-                            }
-                        }).catch(
-                            err => element.params[jskey].val = `// ${translate("Error in Python code")}`
-                        )
-                    }
-                }
-            }
-        }
-
-        return output
-    })
+    // keep track of which categories should be highlighted (for Code Component)
+    let highlightCategs = $state({})
 </script>
 
 <div class=params-container>
@@ -111,7 +52,7 @@
                     <ParamCtrl 
                         name={name} 
                         param={param}
-                    ></ParamCtrl>
+                    />
                 {/if}
             {/each}
         {/if}
@@ -134,11 +75,7 @@
                             (value) => {pageIndex = categ}
                         }
                     >
-                        <div 
-                            class=params-panel
-                            style:flex-direction={horizontal ? "row" : "column"}
-                            style:min-width={horizontal ? "65rem" : "45rem"}
-                        >
+                        <div class=params-panel>
                             <!-- start ctrl, if needed -->
                             {#if "startVal" in params}
                                 <StartStopCtrl
@@ -157,11 +94,31 @@
                             {/if}
                             <!-- other params -->
                             {#each Object.entries(params) as [name, param]}
-                                {#if !["startVal", "startType", "startEstim", "stopVal", "stopType", "durationEstim", ...hideParams].includes(name)}
+                                {#if name in translatableParams}
+                                    <!-- translatable code params need to be in a pane sizer -->
+                                    <TranslatedCodeCtrl
+                                        bind:codeTypeParam={element.params["Code Type"]}
+                                        bind:pyParam={element.params[name]}
+                                        bind:jsParam={element.params[translatableParams[name]]}
+                                        bind:highlight={highlightCategs[categ]}
+                                    />
+                                {:else if [
+                                    "startVal", 
+                                    "startType", 
+                                    "startEstim", 
+                                    "stopVal", 
+                                    "stopType", 
+                                    "durationEstim", 
+                                    ...Object.values(translatableParams), 
+                                    ...hideParams
+                                ].includes(name)}
+                                    <!-- start/stop params and JS params are already covered, so skip them along with any always hidden -->
+                                {:else}
+                                    <!-- other params rendered as normal -->
                                     <ParamCtrl 
                                         name={name} 
                                         bind:param={element.params[name]}
-                                    ></ParamCtrl>
+                                    />
                                 {/if}
                             {/each}
                         </div>
@@ -175,6 +132,7 @@
 <style>
     .params-panel {
         display: flex;
+        flex-direction: column;
         align-items: stretch;
         justify-content: stretch;
         gap: 1rem;
@@ -184,6 +142,7 @@
         height: 100%;
         width: 100%;
         min-height: 10rem;
+        min-width: 45rem;
     }
     .uncategorised-params-panel {
         display: grid;

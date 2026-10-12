@@ -19,25 +19,32 @@
     )
 
 </script>
-<div 
-    class=param-code-input-multi
-    id={param.name}
-    aria-label={param.label}
-    {@attach element => param.registerValidator("code", validateCode, 10)}
-    {...attachments}
->
-    <CodeEditor 
-        bind:value={param.val}
-        language={language}
-        readonly={disabled}
-        disabled={disabled}
-    />
+
+<div class=container>
+    <div 
+        class=param-code-input-multi
+        id={param.name}
+        aria-label={param.label}
+        {@attach element => param.registerValidator("code", validateCode, 10)}
+        {...attachments}
+    >
+        <CodeEditor 
+            bind:value={param.val}
+            language={language}
+            readonly={disabled}
+            disabled={disabled}
+        />
+    </div>
 </div>
 
 <style>
-    .param-code-input-multi {
+    .container {
         position: relative;
         width: 100%;
+    }
+    .param-code-input-multi {
+        position: absolute;
+        inset: 0;
         border: 1px solid var(--overlay);
         padding: .5rem;
     }

@@ -152,7 +152,7 @@
             <ValueCtrl 
                 bind:param={param}
                 disabled={!enabled}
-            ></ValueCtrl>
+            />
         </div>
         <div 
             class=warning
