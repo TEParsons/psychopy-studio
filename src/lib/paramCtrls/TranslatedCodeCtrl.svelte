@@ -5,8 +5,14 @@
     let {
         codeTypeParam=$bindable(),
         pyParam=$bindable(),
-        jsParam=$bindable()
+        jsParam=$bindable(),
+        highlight=$bindable()
     } = $props()
+
+    // highlight category if we have content
+    $effect(() => highlight = [pyParam.val, jsParam.val].some(
+        val => !["", "// Translating..."].includes(val)
+    ))
 </script>
 
 
