@@ -25,7 +25,7 @@
             {#if valueParam?.hint}
                 <Tooltip
                     bind:shown={showTooltip}
-                    position=right
+                    position=bottom
                 >
                     {valueParam.hint}
                 </Tooltip>
@@ -67,12 +67,16 @@
             for={expectedParam?.name}
         >
             {expectedParam.label}
+            {#if expectedParam.hint}
+                <Tooltip>
+                    {expectedParam.hint}
+                </Tooltip>
+            {/if}
         </label>
         <input 
             class=param-estim 
             type="text" 
             bind:value={expectedParam.val} 
-            
             id={expectedParam?.name}
         />
     {/if}
