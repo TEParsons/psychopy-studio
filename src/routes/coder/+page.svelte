@@ -9,6 +9,7 @@
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
+    import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
     import OutlinePanel from "./outline/OutlinePanel.svelte";
@@ -61,18 +62,45 @@
     
     <PaneGroup direction="horizontal">
         {#if electron}
-            <Pane defaultSize={1/5}>
+            <Pane defaultSize={1/6}>
                 <Panel 
-                    title={translate("Files")}
+                    title={translate("Navigation")}
                 >
-                    <FileExplorer />
+                    <Notebook>
+                        <NotebookPage
+                            label={translate("Files")}
+                            bind:selected={
+                                () => current.navigationtab === "files",
+                                (val) => {
+                                    if (val) {
+                                        current.navigationtab = "files"
+                                    }
+                                }
+                            }
+                        >
+                            <FileExplorer />
+                        </NotebookPage>
+                        <NotebookPage
+                            label={translate("Outline")}
+                            bind:selected={
+                                () => current.navigationtab === "outline",
+                                (val) => {
+                                    if (val) {
+                                        current.navigationtab = "outline"
+                                    }
+                                }
+                            }
+                        >
+                            <OutlinePanel />
+                        </NotebookPage>
+                    </Notebook>
                 </Panel>
             </Pane>
         {/if}
 
         <PaneResizer style="width: .3rem;"/>
 
-        <Pane defaultSize={3/5}>
+        <Pane defaultSize={5/6}>
 
             <PaneGroup direction="vertical">
                 <Pane defaultSize={3/4}>
@@ -95,17 +123,6 @@
                     </Pane>
                 {/if}
             </PaneGroup>
-
-        </Pane>
-            
-        <PaneResizer style="width: .3rem;"/>
-            
-        <Pane defaultSize={1/5}>
-            <Panel 
-                title={translate("Outline")}
-            >
-                <OutlinePanel />
-            </Panel>
         </Pane>
     </PaneGroup>
     

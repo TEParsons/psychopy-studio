@@ -5,9 +5,18 @@ import { parsePath, mime } from "$lib/utils/files"
 import { electron } from "$lib/globals.svelte"
 
 export let current = $state({
-    pages: [],
+    pages: [
+        new Script({
+            file: undefined,
+            parent: undefined,
+            name: "untitled.py",
+            stem: "untitled",
+            ext: ".py"
+        })
+    ],
     tab: 0,
     shelltab: "stdout",
+    navigationtab: "outline",
     directory: undefined,
     openFile: async file => {
         if (typeof file === "string") {

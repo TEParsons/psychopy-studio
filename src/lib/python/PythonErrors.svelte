@@ -56,5 +56,6 @@
     .output-container {
         position: relative;
         height: 40rem;
+        min-width: 55rem;
     }
 </style>
