@@ -66,7 +66,12 @@
             />
         {/each}
     </TreeBranch>
-{:else if !top}
+{:else if top}
+    <TreeNode 
+        label={name}
+        icon={icons?.[type]}
+    />
+{:else}
     <TreeNode 
         label={name}
         icon={icons?.[type]}
