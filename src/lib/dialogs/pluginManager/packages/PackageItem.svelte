@@ -22,10 +22,6 @@
 
      // install progress information
     let showProgress = $state.raw(false)
-
-    $inspect(
-        siblings.installed[name]
-    )
 </script>
 
 {#snippet page()}
