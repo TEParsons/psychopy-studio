@@ -694,7 +694,7 @@ export class Experiment {
             await electron.paths.prefs()
         )
         // wait for it to finish
-        await python.scripts.wait(version, this.running)
+        await python.scripts.wait(this.useVersion, this.running)
         // if stopped manually, stopPython will have already marked it stopped
         if (this.running === undefined) {
             return
