@@ -40,6 +40,10 @@ export class PythonVenv {
         let venv = new PythonVenv(pythonVersion, psychopyVersion)
         // try to get Python executable
         venv.executable = await uv.findPython(psychopyVersion)
+        // if another venv object was stored while we awaited, use that so refs to it aren't orphaned
+        if (psychopyVersion in venvs) {
+            return venvs[psychopyVersion]
+        }
         // store in venvs object
         venvs[psychopyVersion] = venv
         // if we were waiting for this venv, resolve now
@@ -405,14 +409,24 @@ export async function getVenv(version) {
     if (version in venvs) {
         // if made, return it
         return venvs[version]
+    } else if (version in creating) {
+        // if being made, wait for it rather than making a duplicate
+        return creating[version]
     } else {
         // if environment exists but no object, make one
         for (let env of await uv.getEnvironments()) {
             if (env.psychopyVersion === version) {
-                return PythonVenv.create(
-                    env.pythonVersion, 
+                // check again, as another call may have started creating it while we awaited
+                if (version in venvs) {
+                    return venvs[version]
+                }
+                creating[version] ??= PythonVenv.create(
+                    env.pythonVersion,
                     env.psychopyVersion
+                ).finally(
+                    () => delete creating[version]
                 )
+                return creating[version]
             }
         }
         // if none exist, await one's existance
@@ -425,5 +439,7 @@ export async function getVenv(version) {
 
 // store promises awaiting the setup of a venv here
 const awaiting = {}
+// store promises for venv objects which are mid-creation here
+const creating = {}
 // store created venvs here
 export const venvs = {}
