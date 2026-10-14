@@ -12257,7 +12257,7 @@
             "Screen": {
                 "val": 1,
                 "valType": "num",
-                "inputType": "spin",
+                "inputType": "screen",
                 "categ": "Screen",
                 "updates": null,
                 "allowedUpdates": null,
