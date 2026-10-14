@@ -18,9 +18,23 @@ export class Liaison {
         this.socket = undefined
         // ready markers
         this.started = false
-        this.open = Promise.withResolvers();
-        this.ready = Promise.withResolvers();
+        this.open = Liaison.marker()
+        this.ready = Liaison.marker()
         this.pending = []
+    }
+
+    /**
+     * Make a deferred promise which records whether it has settled, so we know whether it's safe to replace
+     */
+    static marker() {
+        let output = Promise.withResolvers()
+        output.settled = false
+        output.promise.then(
+            () => output.settled = true,
+            () => output.settled = true
+        )
+
+        return output
     }
 
 
@@ -175,8 +189,15 @@ export class Liaison {
             this.socket.close()
             this.socket = undefined
         }
-        // ready markers
-        this.ready = Promise.withResolvers();
+        // reset ready markers, but only replace settled ones - anything awaiting an unsettled one
+        // (e.g. a `python.liaison.ready` invoke) would otherwise be orphaned and never get a reply
+        this.started = false
+        if (this.open.settled) {
+            this.open = Liaison.marker()
+        }
+        if (this.ready.settled) {
+            this.ready = Liaison.marker()
+        }
         this.pending = []
     }
 
