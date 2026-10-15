@@ -133,12 +133,43 @@ export function openExternal(url) {
  * @param {string} url URL to zip/tar file to download
  * @param {string} target Folder path to extract folder to
  * @param {string|undefined} name Name to give the extracted folder; leave as undefined to use the name it has online
+ * @param {boolean} overwrite Whether or not to overwrite target folder, if it already exists
  */
 export async function downloadFolder(
     url,
     target,
-    name=undefined
+    name=undefined,
+    overwrite=false
 ) {
+    /**
+     * Check whether target folder already exists and has files
+     * 
+     * @param {string} targetFolder Folder to check
+     * @returns {boolean} `true` if there's a conflict, `false` otherwise
+     */
+    function hasConflict(targetFolder) {
+        if (fs.existsSync(targetFolder)) {
+            // folder exists...
+            if (fs.readdirSync(targetFolder).length) {
+                // ...and has files
+                return true
+            } else {
+                // ...but is empty, so can be overwritten
+                return false
+            }
+        } else {
+            // folder doesn't exist
+            return false
+        }
+    }
+
+    // if given a name for extracted folder but told not to overwrite, we can check conflict before downloading
+    if (name && !overwrite && hasConflict(path.join(target, name))) {
+        throw Object.assign(
+            new Error(`Could not download ${url} to ${path.join(target, name)} as folder already exists and is not empty.`),
+            { code: "EEXIST", path: path.join(target, name) }
+        )
+    }
     // get filename from url
     let filename = URL.parse(url).pathname.split("/").at(-1)
     // get file content (using https rather than fetch, as GitLab rejects fetch's `Sec-Fetch-Mode: cors` header)
@@ -187,8 +218,24 @@ export async function downloadFolder(
     // if the archive has one top-level folder, use that as the root
     let contents = fs.readdirSync(tmp, { withFileTypes: true })
     let root = contents.length === 1 && contents[0].isDirectory() ? path.join(tmp, contents[0].name) : tmp
+    let dest = path.join(target, name ?? path.basename(root))
+    // if we weren't given a filename, check for conflicts now that we know the destination folder
+    if (!name && !overwrite && hasConflict(dest)) {
+        // delete zip file and temp folder
+        fs.unlink(zipfile, err => {if (err) throw err})
+        fs.rmSync(tmp, { recursive: true, force: true })
+        // error
+        throw Object.assign(
+            new Error(`Could not download ${url} to ${dest} as folder already exists and is not empty.`),
+            { code: "EEXIST", path: dest }
+        )
+    }
+    // clear the destination if we're overwriting it, or if it's empty (Windows can't rename onto an existing folder)
+    if (fs.existsSync(dest)) {
+        fs.rmSync(dest, { recursive: true, force: true })
+    }
     // move it into place under the requested name
-    fs.renameSync(root, path.join(target, name ?? path.basename(root)))
+    fs.renameSync(root, dest)
     // delete zip file and temp folder
     fs.unlink(zipfile, err => {if (err) throw err})
     fs.rmSync(tmp, { recursive: true, force: true })

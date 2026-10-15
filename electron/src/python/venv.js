@@ -128,14 +128,16 @@ export class PythonVenv {
         }
         // install psychopy library
         if (!("psychopy" in installed || "psychopy-lib" in installed)) {
-            // get zip file to install
-            let source
+            // get zip file to install, and choose the name of the folder it extracts to
+            let source, moduleName
             if (this.psychopyVersion === "dev" || prerelease === "dev") {
                 // for dev environment, install from dev branch
                 source = "https://github.com/psychopy/psychopy/archive/refs/heads/dev.zip"
+                moduleName = "psychopy-dev"
             } else if (prerelease === "release") {
                 // for prerelease, install from release branch
                 source = "https://github.com/psychopy/psychopy/archive/refs/heads/release.zip"
+                moduleName = "psychopy-release"
             } else {
                 // for released version, install from tag
                 let pkg = "psychopy"
@@ -144,7 +146,9 @@ export class PythonVenv {
                     pkg += "-lib"
                 }
                 source = `https://github.com/psychopy/${pkg}/archive/refs/tags/${this.psychopyVersion}.zip`
+                moduleName = `${pkg}-${this.psychopyVersion}`
             }
+            let moduleFolder = path.join(this.ppyFolder, moduleName)
             // make sure there's a folder to download psychopy to
             if (!fs.existsSync(this.ppyFolder)) {
                 fs.mkdirSync(this.ppyFolder, {
@@ -155,26 +159,35 @@ export class PythonVenv {
             uv.output(
                 "Downloading PsychoPy library..."
             )
-            await downloadFolder(
-                source,
-                this.ppyFolder
-            )
-            uv.output(
-                "Finished downloading PsychoPy library."
-            )
-            // get name of module folder within extracted folder
-            let moduleFolder = fs.readdirSync(this.ppyFolder, { withFileTypes: true }).find(
-                entry => entry.isDirectory()
-            ).name
+            try {
+                await downloadFolder(
+                    source,
+                    this.ppyFolder,
+                    moduleName
+                )
+                uv.output(
+                    "Finished downloading PsychoPy library."
+                )
+            } catch (err) {
+                // if folder already exists, don't redownload
+                if (err.code === "EEXIST") {
+                    uv.output(
+                        "PsychoPy library is already downloaded, so cancelled download."
+                    )
+                } else {
+                    // if anything else went wrong, error as usual
+                    throw err
+                }
+            }
             // try to sync with psychopy
             try {
                 await this.syncProject(
-                    path.join(this.ppyFolder, moduleFolder)
+                    moduleFolder
                 )
             } catch {
                 // if this fails (as it will with older versions) do pip install instead
                 await this.installPackage(
-                    path.join(this.ppyFolder, moduleFolder)
+                    moduleFolder
                 )
             }
 
