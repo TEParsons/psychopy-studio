@@ -1,7 +1,7 @@
 <script>
     import { TreeNode, TreeBranch } from "$lib/utils/tree"
     import OutlineNode from "./OutlineNode.svelte";
-    import { parsePython, parseJavaScript } from "./parsers.js"
+    import { parsePython, parseJavaScript, parseMarkdown } from "./parsers.js"
     import { current } from "../globals.svelte";
 
     let {
@@ -30,6 +30,10 @@
             // parse JS file
             if ([".js", ".cjs", ".ts"].includes(current.pages[current.tab].file.ext)) {
                 return parseJavaScript(content, index + 1)
+            }
+            // parse Markdown file
+            if ([".md"].includes(current.pages[current.tab].file.ext)) {
+                return parseMarkdown(content, index + 1)
             }
         } catch (err) {
             console.error(err)
