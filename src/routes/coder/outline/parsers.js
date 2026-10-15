@@ -82,7 +82,7 @@ export function parseMarkdown(content, index=1) {
     let subnodes = [];
     // parse Markdown
     let node = mdParser.parse(content)
-    // 
+    // this allows us to skip to a given node in the iterator
     let skipTo = undefined
     // iterate through subnodes
     node.iterate({
