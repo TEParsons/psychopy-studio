@@ -200,7 +200,9 @@ export class UV {
         try {
             await downloadFolder(
                 `https://github.com/astral-sh/uv/releases/download/${this.version}/${installers[platform][arch]}`,
-                this.uvFolder
+                path.dirname(this.uvFolder),
+                path.basename(this.uvFolder),
+                true
             )
             this.output(`Finished installing UV.`)
         } catch (err) {
