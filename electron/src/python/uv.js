@@ -15,7 +15,7 @@ export class UV {
     folderSpecified = Promise.withResolvers();
 
     // defines the version of UV to install
-    version = "0.12.5"
+    version = "0.12.12"
 
     /**
      * Choose a folder for the given directory option according to the current OS.
