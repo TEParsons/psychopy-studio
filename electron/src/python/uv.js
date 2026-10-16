@@ -99,7 +99,7 @@ export class UV {
      */
     get executable() {
         return path.join(
-            this.uvFolder, "uv"
+            this.uvFolder, "uv" + (platform === "win32" ? ".exe" : "")
         )
     }
 
