@@ -86,13 +86,14 @@
             label={translate("Save file")}
             shortcut="save"
             onclick={file_save} 
-            disabled={!current.experiment.history.past.length} 
+            disabled={current.experiment.loading || !current.experiment.history.past.length} 
         />
         <MenuItem 
             icon="/icons/btn-saveas.svg" 
             label={translate("Save file as")}
             shortcut="saveAs"
             onclick={file_save_as} 
+            disabled={current.experiment.loading}
         />
         <MenuItem
             label={translate("Reveal in file explorer")}
@@ -226,6 +227,7 @@
             label={translate("Experiment settings")}
             icon="/icons/btn-settings.svg"
             onclick={evt => show.settingsDlg = true}
+            disabled={!current.experiment.settings}
         />
 
         <MenuItem 
@@ -398,10 +400,13 @@
 <FindDialog
     bind:shown={show.findDlg}
 />
-<ParamsDialog
-    element={current.experiment.settings}
-    bind:shown={show.settingsDlg}
-/>
+{#await current.experiment.ready then}
+    <ParamsDialog
+        element={current.experiment.settings}
+        bind:shown={show.settingsDlg}
+    />
+{:catch}
+{/await}
 <DeviceManagerDialog
     bind:shown={show.deviceMgrDlg}
 />

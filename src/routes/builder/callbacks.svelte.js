@@ -63,6 +63,10 @@ export async function revealFolder() {
 
 
 export async function file_save() {
+    // can't save while a file is still loading
+    if (current.experiment.loading) {
+        return
+    }
     // diverge here based on whether there is a current file...
     if (current.experiment.file.file) {
         current.experiment.toFile(
@@ -76,6 +80,10 @@ export async function file_save() {
 }
 
 export async function file_save_as() {
+    // can't save while a file is still loading
+    if (current.experiment.loading) {
+        return
+    }
     // open file browser
     let file = await browseFileSave(
         [
@@ -231,7 +239,9 @@ export async function pasteComponent(routine, index) {
 /* Run */
 
 
-export function togglePiloting() {
+export async function togglePiloting() {
+    // wait for settings
+    await current.experiment.ready
     // update history
     current.experiment.history.update(`toggle pilot mode`)
     // toggle pilot mode
