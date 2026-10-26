@@ -41,6 +41,11 @@ export class PythonVenv {
         psychopyVersion = await resolvePackageVersion(psychopyVersion, "psychopy")
         // make venv object
         let venv = new PythonVenv(pythonVersion, psychopyVersion, prerelease)
+        // is this the version matching the app?
+        if (semver.valid(appVersion) && psychopyVersion === `${semver.major(appVersion)}.${semver.minor(appVersion)}.${semver.patch(appVersion)}`) {
+            // if so, inherit any prerelease info
+            venv.prerelease = semver.prerelease(appVersion)?.[0]
+        }
         // try to get Python executable
         venv.executable = await uv.findPython(psychopyVersion)
         // if another venv object was stored while we awaited, use that so refs to it aren't orphaned
